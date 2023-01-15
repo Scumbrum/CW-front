@@ -1,0 +1,101 @@
+<ng-container *ngIf="user">
+  <form [formGroup]="form">
+    <div class="action-panel" *ngIf="mode === 'me'" [class.centred]="role === 'admin'">
+      <button mat-raised-button (click)="logout()" class="logout" color="accent">Logout</button>
+      <h2 *ngIf="role==='user'" >Profile of {{user.name}}</h2>
+      <button mat-raised-button (click)="openStreamModal()" *ngIf="role==='user'" class="starter" color="primary">Start stream</button>
+    </div>
+    <div class="profile-container">
+      <mat-list>
+        <li>
+          <h3>Name</h3>
+          <p *ngIf="!editMode" id="display-name">{{ user.name }}</p>
+          <mat-form-field *ngIf="editMode" class="example-full-width" appearance="fill">
+            <mat-label>Name</mat-label>
+            <input type="text"
+                   autofocus
+                   placeholder="Pick one"
+                   aria-label="Name"
+                   matInput
+                   formControlName="name"
+            >
+          </mat-form-field>
+        </li>
+        <mat-divider></mat-divider>
+        <li>
+          <h3>Login</h3>
+          <p>{{ user.login }}</p>
+        </li>
+        <mat-divider></mat-divider>
+        <li>
+          <h3>About</h3>
+          <p id="display-about" *ngIf="!editMode">{{ user.about }}</p>
+          <mat-form-field *ngIf="editMode" class="example-full-width" appearance="fill">
+            <mat-label>About</mat-label>
+            <input type="About"
+                   placeholder="Pick one"
+                   aria-label="About"
+                   matInput
+                   formControlName="about"
+            >
+          </mat-form-field>
+        </li>
+        <mat-divider></mat-divider>
+        <li>
+          <h3>Subscribers</h3>
+          <p>{{ user.subscribers }}</p>
+        </li>
+      </mat-list>
+    </div>
+  </form>
+  <app-loading></app-loading>
+  <button *ngIf="!editMode && mode === 'me'" (click)="editMode = true" mat-raised-button class="edit-button" color="primary">Edit</button>
+  <button
+    *ngIf="mode === 'other' && !user.isSubscribed"
+    (click)="onSubscribe()"
+    mat-raised-button
+    class="edit-button"
+    color="primary"
+  >
+    Subscribe
+  </button>
+  <button
+    *ngIf="mode === 'other' && user.isSubscribed"
+    (click)="onUnsubscribe()"
+    mat-raised-button
+    class="edit-button"
+    color="accent"
+  >
+    Unsubscribe
+  </button>
+
+  <div class="controlls-panel" *ngIf="editMode">
+    <button mat-raised-button class="cancel-button" (click)="editMode = false" color="accent">Cancel</button>
+    <button mat-raised-button class="save-button" (click)="onSubmit()" color="primary">Save</button>
+  </div>
+
+  <div class="streams">
+    <ng-container *ngIf="mode === 'me'">
+      <div class="list">
+        <h2>Ended streams</h2>
+        <mat-paginator [pageSize]="pageSize" [length]="total" [hidePageSize]="true" (page)="onPage($event)" aria-label="Select page">
+        </mat-paginator>
+        <mat-list>
+          <mat-list-item (click)="downloadHandler(stream.id)" class="mat-mdc-list-item-interactive" *ngFor="let stream of endedStreams">
+            {{ stream.name }}
+          </mat-list-item>
+        </mat-list>
+      </div>
+    </ng-container>
+    <div class="list" *ngIf="activeStreams.length">
+      <h2>Active streams</h2>
+      <mat-list>
+        <mat-list-item class="mat-mdc-list-item-interactive" *ngFor="let stream of activeStreams" [routerLink]="['/stream', stream.id]">
+          {{ stream.name }}
+        </mat-list-item>
+      </mat-list>
+    </div>
+
+  </div>
+</ng-container>
+

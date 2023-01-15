@@ -1,0 +1,39 @@
+<h2>Starting a stream</h2>
+<form >
+  <mat-form-field>
+    <input class="stream-name-controller" [formControl]="streamName" type="text" matInput placeholder="Stream title">
+  </mat-form-field>
+  <h3>Moderators</h3>
+  <div class="chooser">
+    <div class="users-picker">
+      <h3>Users</h3>
+      <mat-form-field>
+        <input [formControl]="userQuery" type="text" matInput placeholder="Search">
+      </mat-form-field>
+      <div class="list" infinite-scroll [scrollWindow]="false" (scrolled)="loadMore()">
+        <mat-list >
+          <mat-list-item (click)="addToModerators(user)" *ngFor="let user of currentUsers">
+            {{ user.name }}
+          </mat-list-item>
+        </mat-list>
+      </div>
+    </div>
+    <div class="users-picker">
+      <h3>Chosen</h3>
+      <div class="list" infinite-scroll [scrollWindow]="false" (scrolled)="loadMore()">
+        <mat-list>
+          <mat-list-item (click)="removeFromModerators(user)" *ngFor="let user of selectedModerators">
+            {{ user.name }}
+          </mat-list-item>
+        </mat-list>
+      </div>
+    </div>
+  </div>
+</form>
+
+<app-loading></app-loading>
+<div class="controllers">
+  <button mat-raised-button (click)="close()" color="accent">Close</button>
+  <button mat-raised-button (click)="onSubmit()" color="primary" class="starter" [disabled]="!dataValid && streamName.touched">Start</button>
+</div>
+

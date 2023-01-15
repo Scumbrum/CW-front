@@ -1,0 +1,9 @@
+<h2>Subscriptions</h2>
+<mat-paginator [pageSize]="pageSize" [length]="total" [hidePageSize]="true" (page)="loadMore($event)" aria-label="Select page">
+</mat-paginator>
+<mat-list role="list">
+  <mat-list-item class="mat-mdc-list-item-interactive" *ngFor="let subsctibe of subscruption" role="listitem" [routerLink]="['/profile', subsctibe.id]" >
+    {{ subsctibe.name }}
+  </mat-list-item>
+</mat-list>
+

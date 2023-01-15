@@ -1,0 +1,11 @@
+<mat-paginator [pageSize]="pageSize" [length]="total * pageSize" [hidePageSize]="true" (page)="loadMore($event)" aria-label="Select page">
+</mat-paginator>
+<mat-list role="list">
+  <mat-list-item class="mat-mdc-list-item-interactive" *ngFor="let user of users" role="listitem" >
+    <div class="user-inner">
+      <p>{{ user.name }}</p>
+      <button mat-raised-button *ngIf="user.blocked" (click)="updateHandler(user.id)" color="accent"> Unblock </button>
+      <button mat-raised-button *ngIf="!user.blocked" (click)="updateHandler(user.id)" color="primary"> Block </button>
+    </div>
+  </mat-list-item>
+</mat-list>

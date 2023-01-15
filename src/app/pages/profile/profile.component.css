@@ -1,0 +1,81 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 15px;
+
+}
+
+form  {
+  width: 50%;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.profile-container {
+  box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%), 0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  padding: 0 15px;
+  min-height: 50px;
+}
+li * {
+  margin: 0;
+}
+
+
+li p {
+  word-wrap: break-word;
+  margin-left: 15px;
+}
+
+li h3 {
+  font-weight: bold;
+}
+
+li h3 {
+  max-width: 60%;
+}
+
+.edit-button {
+  margin-top: 15px;
+}
+
+.controlls-panel{
+  width: 30%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.action-panel {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto 20px;
+}
+
+.centred {
+  justify-content: center;
+}
+
+.streams {
+  justify-content: space-between;
+  display: flex;
+  width: 50%;
+  margin-top: 25px;
+}
+
+.streams .list {
+  width: 40%;
+}

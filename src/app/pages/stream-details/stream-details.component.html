@@ -1,0 +1,52 @@
+<ng-container *ngIf="streamData && streamLive; else noStream">
+  <div class="container">
+    <video class="author-video" *ngIf="streamLive && authorMode" [srcObject]="stream" [muted]="true" autoplay></video>
+    <div class="video-controlls" *ngIf="!authorMode">
+      <button (click)="onLoad()" mat-raised-button  color="primary">Play</button>
+      <button (click)="pause()" mat-raised-button  color="primary">Stop</button>
+    </div>
+    <div *ngIf="!authorMode" class="video-container">
+      <video
+        #video
+        [hidden]="activePart % 2 === 0"
+        [src]="currentSrc" (ended)="onEnded()"
+        (timeupdate)="onTimeUpdate($event)"
+      ></video>
+      <video
+        #video2
+        [hidden]="activePart % 2 === 1"
+        [src]="nextSrc" (ended)="onEnded()"
+        (timeupdate)="onTimeUpdate($event)"
+      ></video>
+      <app-loading *ngIf="isVideoLoading"></app-loading>
+    </div>
+    <div class="action-panel">
+      <h2> {{ streamData.name }} </h2>
+      <div class="stream-info">
+        <div class="main-info">
+          <p [routerLink]="['/profile', streamData.userId]">{{ streamData.userName }}</p>
+          <strong>Viewers: {{ streamData.viewers }}</strong>
+        </div>
+        <div class="stream-controllers">
+          <button *ngIf="streamLive && authorMode && stream" mat-raised-button (click)="stopStream()" color="accent">Stop stream</button>
+          <button *ngIf="!authorMode && !reported" mat-raised-button (click)="reportStream()" id="report" color="accent">Report</button>
+          <button *ngIf="!authorMode && !isSubscribes" mat-raised-button (click)="subscribe()" color="accent">Subscribe</button>
+          <button *ngIf="!authorMode && isSubscribes" mat-raised-button (click)="unsubscribe()" color="primary">Unsubscribe</button>
+        </div>
+      </div>
+    </div>
+
+    <app-stream-chat
+      class="chat"
+      *ngIf="streamData && streamLive"
+      [creator]="authorMode"
+      [moderator]="isModerator"
+      [authorId]="streamData.userId"
+      [id]="currentStreamId"
+    ></app-stream-chat>
+  </div>
+</ng-container>
+
+<ng-template #noStream>
+  <h2 class="not-found">This stream was ended or not exists</h2>
+</ng-template>

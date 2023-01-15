@@ -1,0 +1,38 @@
+<form class="example-form">
+  <mat-form-field class="example-full-width" appearance="fill">
+    <mat-label>Search</mat-label>
+    <input type="text"
+           placeholder="Type something"
+           aria-label="Search"
+           matInput
+           [formControl]="name"
+           [matAutocomplete]="auto"
+           >
+    <mat-autocomplete
+      autoActiveFirstOption #auto>
+      <div
+          class="autocomplete-wrapper"
+          infiniteScroll
+          [infiniteScrollDistance]="2"
+          [infiniteScrollThrottle]="50"
+          (scrolled)="onScroll()"
+          [scrollWindow]="false">
+        <ng-container *ngIf="searchTarget.value === 'streams'; else users">
+          <mat-option [routerLink]="['/stream', stream.id]" *ngFor="let stream of streamList" [value]="stream.name" [fragment]="stream.name">
+            {{ stream.name }}
+          </mat-option>
+        </ng-container>
+        <ng-template #users>
+          <mat-option [routerLink]="['/profile', user.id]" *ngFor="let user of usersList" [value]="user.name" [fragment]="user.name">
+            {{ user.name }}
+          </mat-option>
+        </ng-template>
+      </div>
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-radio-group [formControl]="searchTarget">
+    <mat-radio-button value="users">Users</mat-radio-button>
+    <mat-radio-button value="streams">Streams</mat-radio-button>
+  </mat-radio-group>
+</form>
+

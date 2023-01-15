@@ -1,0 +1,29 @@
+<p>
+  <mat-toolbar color="secondary">
+    <span class="logo" [routerLink]="['/']">Media live</span>
+    <ng-container *ngIf="isAuth">
+      <span class="example-spacer"></span>
+      <app-search  *ngIf="currentRole === 'user'"></app-search>
+      <span class="example-spacer"></span>
+      <button mat-icon-button class="example-icon" [matMenuTriggerFor]="menu" aria-label="Example icon-button with menu icon">
+        <mat-icon [matBadge]="unreaded ? unreaded : ''" matBadgeColor="accent">notifications</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu" [xPosition]="'before'">
+        <mat-list>
+          <div class="notification-inner" infinite-scroll [scrollWindow]="false" (scrolled)="loadMore()">
+            <mat-list-item *ngFor="let notification of notifications" (click)="openNotificationModal(notification)">
+              <b *ngIf="!notification.isViewed; else viewed">{{ notification.text }}</b>
+              <ng-template #viewed>
+                {{ notification.text }}
+              </ng-template>
+            </mat-list-item>
+          </div>
+        </mat-list>
+      </mat-menu>
+      <button [routerLink]="['/profile']" mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+        <mat-icon>person</mat-icon>
+      </button>
+    </ng-container>
+  </mat-toolbar>
+</p>
+

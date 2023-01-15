@@ -1,0 +1,19 @@
+<div class="subscription" *ngIf="currentRole === 'user'">
+  <app-subscriber-list></app-subscriber-list>
+</div>
+
+<mat-list  class="side-list"  *ngIf="currentRole === 'user' && charts.length">
+  <h2>Charts</h2>
+  <mat-list-item *ngFor="let chart of charts" [routerLink]="['/stream', chart.id]">
+    <p>{{ chart.name }}</p>
+    <strong><span>Viewers:</span> {{ chart.viewers }}</strong>
+  </mat-list-item>
+</mat-list>
+
+<mat-list class="side-list"  *ngIf="currentRole === 'admin'">
+  <mat-list-item *ngFor="let stream of reported" [routerLink]="['/stream', stream.id]">
+    <p>{{ stream.name }}</p>
+    <button mat-raised-button (click)="stopStream(stream.id)" color="accent">Stop stream</button>
+  </mat-list-item>
+  <app-users-list></app-users-list>
+</mat-list>

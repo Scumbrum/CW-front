@@ -1,0 +1,27 @@
+:host {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 15px;
+}
+
+.subscription {
+  padding-top: 25px;
+  width: 30%;
+  border: 2px solid lightgray;
+}
+
+.side-list {
+  width: 50%;
+  padding-top: 25px;
+}
+
+::ng-deep .side-list .mat-mdc-list-item .mdc-list-item__primary-text {
+  display: flex;
+  justify-content: space-between;
+}
+
+.side-list strong {
+  min-width: 20%;
+  display: flex;
+  justify-content: space-between;
+}

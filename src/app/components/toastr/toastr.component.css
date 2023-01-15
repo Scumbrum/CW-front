@@ -1,0 +1,17 @@
+::ng-deep .background-red.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: red;
+  color: #FFFFFF;
+  --mdc-snackbar-supporting-text-color: rgb(255, 255, 255);
+}
+
+::ng-deep .background-blue.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: dodgerblue;
+  color: #FFFFFF;
+  --mdc-snackbar-supporting-text-color: rgb(255, 255, 255);
+}
+
+::ng-deep .background-green.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: green;
+  color: #FFFFFF;
+  --mdc-snackbar-supporting-text-color: rgb(255, 255, 255);
+}

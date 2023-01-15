@@ -1,0 +1,16 @@
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+.logo {
+  cursor: pointer;
+}
+
+mat-list {
+  max-height: 40vh;
+}
+
+.notification-inner {
+  max-height: 40vh;
+  overflow: auto;
+}

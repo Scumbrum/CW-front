@@ -1,0 +1,40 @@
+<ng-container *ngIf="isOpen">
+  <mat-list *ngIf="moderator && restrictions.length">
+    <h2>Restrictions</h2>
+    <mat-list-item *ngFor="let restriction of restrictions" (click)="deleteRestriction(restriction.userId)">
+      {{ restriction.userName }}
+    </mat-list-item>
+  </mat-list>
+
+  <main class="msger-chat">
+    <div *ngFor="let message of messages" class="msg"
+         [class.left-msg]="message.userId !== userId"
+         [class.right-msg]="message.userId === userId"
+         [class.error-msg]="message.messageType === 'ERROR'"
+    >
+
+      <div class="msg-bubble">
+        <div class="msg-info" *ngIf="message.messageType !== 'ERROR'">
+          <div class="msg-info-name">{{ message.name }}</div>
+          <div class="msg-info-time">{{ message.date | date: 'HH:mm'}}</div>
+        </div>
+
+        <div class="msg-text">
+          {{ message.text }}
+        </div>
+      </div>
+      <div class="controlls" *ngIf="displayControlls(message)">
+        <button (click)="addFirstRestriction(message.userId, message.name)" mat-raised-button color="accent">Block</button>
+        <button (click)="addSecondRestriction(message.userId, message.name)" mat-raised-button color="warn">Limit</button>
+        <button (click)="deleteMessage(message.id!)" mat-raised-button color="accent">Delete</button>
+      </div>
+    </div>
+  </main>
+
+  <form class="msger-inputarea">
+    <input type="text" class="msger-input" [formControl]="messageQuery" placeholder="Enter your message...">
+    <button type="submit" class="msger-send-btn" (click)="sendMessage()">Send</button>
+  </form>
+</ng-container>
+
+

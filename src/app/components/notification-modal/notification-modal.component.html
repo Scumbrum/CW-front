@@ -1,0 +1,7 @@
+<h2>{{ data.text }}</h2>
+<p><b>Date:</b> {{data.date | date : 'YYYY.MM.dd HH:mm'}}</p>
+<div class="controller">
+  <button mat-raised-button (click)="close()" color="accent">Close</button>
+  <button mat-raised-button *ngIf="!data.isViewed" (click)="markAsViewed()" color="primary">Mark as viewed</button>
+</div>
+

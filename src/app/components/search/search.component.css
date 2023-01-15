@@ -1,0 +1,29 @@
+.example-form{
+  display: flex;
+  align-items: center;
+}
+
+.search-button{
+  margin-left: 15px;
+}
+
+.input-search {
+  position:relative;
+}
+
+.search-input-icon {
+  position:absolute;right:10px;top:9px;z-index:3
+}
+
+.criteria-icon-action {
+  color:#cfcfcf;
+}
+
+::ng-deep .example-form .example-full-width .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.autocomplete-wrapper {
+  height: 100%;
+  overflow: auto;
+}
