@@ -1,0 +1,227 @@
+<div class="container">
+  <ng-container [formGroup]="courseForm">
+    <h1>
+      <ng-container *ngIf="!isEditCourseMode">
+        {{ details?.data?.name }}
+        <sup
+          class="status"
+          [class.active]="isActive()"
+          [class.async]="isAsync()"
+        >
+          {{ isActive() ? ' active' : isAsync() ? 'async' : 'pending' }}
+        </sup>
+      </ng-container>
+      <ng-container *ngIf="isEditCourseMode">
+        <mat-form-field class="example-full-width">
+          <mat-label>Name</mat-label>
+          <input formControlName="name" matInput>
+        </mat-form-field>
+      </ng-container>
+    </h1>
+    <p class="description">
+      <span *ngIf="!isEditCourseMode">{{ details?.data?.description }}</span>
+      <mat-form-field class="full-width" *ngIf="isEditCourseMode">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+      </mat-form-field>
+    </p>
+    <p class="creator-info" *ngIf="!isEditCourseMode">
+      Created by: {{ details?.data?.userName }}
+    </p>
+    <div class="range" >
+      <ng-container *ngIf="!isEditCourseMode">
+        <p>Start date:
+          <b>{{ details?.data?.dateStart | date: 'YYYY.MM.dd' }}</b>
+        </p>
+        <p>End date:
+          <b>{{ details?.data?.dateEnd | date: 'YYYY.MM.dd' }}</b>
+        </p>
+      </ng-container>
+      <ng-container *ngIf="isEditCourseMode">
+        <mat-form-field>
+          <mat-label>Start date</mat-label>
+          <input formControlName="dateStart" matInput [matDatepicker]="picker1">
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>End date</mat-label>
+          <input formControlName="dateEnd" matInput [matDatepicker]="picker">
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </ng-container>
+    </div>
+  </ng-container>
+  <mat-divider></mat-divider>
+  <div class="controls">
+    <div class="buttons">
+      <ng-container *ngIf="!isMyCourse">
+        <button
+          mat-raised-button color="primary"
+          *ngIf="!details?.data?.isSubscribed"
+          (click)="addSubscription()"
+        >
+          Subscribe
+        </button>
+        <button
+          mat-raised-button color="warn"
+          *ngIf="details?.data?.isSubscribed"
+          (click)="deleteSubscription()"
+        >
+          Unsubscribe
+        </button>
+      </ng-container>
+      <ng-container *ngIf="isMyCourse">
+        <button
+          mat-raised-button color="primary"
+          *ngIf="!isEditCourseMode"
+          (click)="toggleEditMode()"
+        >
+          Edit
+        </button>
+        <button
+          mat-raised-button color="warn"
+          *ngIf="!isEditCourseMode && details"
+          (click)="deleteCourse()"
+        >
+          Delete
+        </button>
+      </ng-container>
+      <ng-container *ngIf="isEditCourseMode">
+        <button mat-raised-button color="primary" (click)="saveCourseChanges()" [disabled]="courseForm.invalid">
+          Save
+        </button>
+        <button mat-raised-button (click)="toggleEditMode()">
+          Cancel
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="plan" *ngIf="details">
+    <h2>Course plan</h2>
+    <ul class="plans">
+      <ng-container *ngIf="!isEditPlanMode">
+        <li *ngFor="let item of details.plan; let i = index">
+          <mat-card class="plan-event">
+            <h3>{{ item.streamName }}</h3>
+            <p class="date">{{ item.startDate | date: 'YYYY.MM.dd' }}</p>
+            <p class="mark"
+               *ngIf="item.score"
+               [class.no-passed]="!item.isPassed"
+            >{{ item.score }}
+              <sup class="async" *ngIf="item.isAsync">async</sup>
+            </p>
+            <div class="buttons">
+                <button
+                  mat-raised-button
+                  *ngIf="item.assignmentId"
+                  [routerLink]="['/assignment', item.assignmentId]"
+                >
+                  Assignment
+                </button>
+                <button
+                  mat-raised-button
+                  (click)="startStream(item)"
+                >
+                  Stream
+                </button>
+            </div>
+          </mat-card>
+        </li>
+      </ng-container>
+      <ng-container *ngIf="isEditPlanMode">
+        <li *ngFor="let item of planForm.controls; let i = index">
+          <mat-card class="plan-event" [formGroup]="itemForm(i)" *ngIf="!itemForm(i).value.isRemoved">
+            <div class="assignment-choser">
+              <mat-form-field appearance="fill">
+                <mat-label>Choose an option</mat-label>
+                <mat-select formControlName="streamId" (click)="clearStreamSearch()">
+                  <mat-form-field class="example-full-width">
+                    <mat-label>Name</mat-label>
+                    <input [formControl]="searchStream" matInput>
+                  </mat-form-field>
+                  <mat-option *ngIf="!filteredStreams?.length" [value]="item.value.streamId">{{ details.plan[i].streamName }}</mat-option>
+                  <mat-option
+                    *ngFor="let stream of filteredStreams"
+                    [value]="stream.id">
+                    {{ stream.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-raised-button [routerLink]="['/stream', item.value.streamId]">
+                Stream
+              </button>
+              <button mat-raised-button color="primary">
+                Add
+              </button>
+            </div>
+            <div class="assignment-choser">
+              <mat-form-field appearance="fill">
+                <mat-label>Choose an option</mat-label>
+                <mat-select formControlName="assignmentId">
+                  <mat-form-field class="example-full-width">
+                    <mat-label>Name</mat-label>
+                    <input [formControl]="searchAssigment" matInput>
+                  </mat-form-field>
+                  <mat-option [value]="0">No assignment</mat-option>
+                  <mat-option *ngIf="!filteredAssignments?.length && item.value.assignmentId" [value]="item.value.assignmentId">
+                    {{ details.plan[i].assignmentName }}
+                  </mat-option>
+                  <mat-option
+                    *ngFor="let assignment of filteredAssignments"
+                    [value]="assignment.id">
+                    {{ assignment.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-raised-button *ngIf="item.value.assignmentId" [routerLink]="['/assignment', item.value.assignmentId]">
+                Assignment
+              </button>
+              <button mat-raised-button color="primary">
+                Add
+              </button>
+            </div>
+            <div class="buttons">
+                <button mat-raised-button color="warn" (click)="deletePlanItem(i)">
+                  Delete
+                </button>
+            </div>
+          </mat-card>
+        </li>
+      </ng-container>
+    </ul>
+    <div class="buttons" *ngIf="isMyCourse && isEditPlanMode">
+      <button mat-raised-button (click)="addPlanItem()">Add event</button>
+    </div>
+
+    <div class="buttons plan-controls" *ngIf="isMyCourse">
+      <ng-container *ngIf="!isEditPlanMode">
+        <button mat-raised-button color="primary" (click)="togglePlanEditMode()">
+          Edit Plan
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="isEditPlanMode">
+        <button mat-raised-button (click)="togglePlanEditMode()">Cancel</button>
+        <button
+          mat-raised-button color="primary"
+          (click)="savePlanData()"
+          [disabled]="!isPlanValid()"
+        >Save</button>
+      </ng-container>
+    </div>
+  </div>
+  <ng-container *ngIf="!isMyCourse">
+    <p class="total-mark">Course mark: <b>{{ userScore() }}</b></p>
+    <p class="mark-hint">To pass course, you should pass at least {{ minimumPlanPassed() }} events</p>
+  </ng-container>
+  <div class="certificate" *ngIf="details?.data?.isPassed">
+    <p>Congratulation!!! Here is your certificate:</p>
+    <object height="320" width="400" type="application/pdf" [data]="certificateUrl">
+    </object>
+  </div>
+</div>

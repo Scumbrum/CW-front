@@ -2,8 +2,16 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {debounceTime,  Subject, switchMap, takeUntil} from "rxjs";
 import {FormControl} from "@angular/forms";
 import {UsersService} from "../../service/users.service";
-import {Stream,  UserResponse} from "../../shared/interfaces/responses";
+import {
+  Course,
+  CourseListResponse,
+  Stream,
+  StreamListResponse,
+  UserResponse,
+  UsersListResponse
+} from "../../shared/interfaces/responses";
 import {StreamService} from "../../service/stream.service";
+import {CourseService} from "../../service/course.service";
 
 @Component({
   selector: 'app-search',
@@ -15,6 +23,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   public searchTarget = new FormControl('');
   public usersList!: UserResponse[];
   public streamList!: Stream[];
+  public coursesList!: Course[];
   private destroy$ = new Subject<void>();
   private currentPage = 1;
   private pageSize = 10;
@@ -22,7 +31,8 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly usersService: UsersService,
-    private readonly streamService: StreamService
+    private readonly streamService: StreamService,
+    private readonly courseService: CourseService
   ) {
   }
 
@@ -34,18 +44,15 @@ export class SearchComponent implements OnInit, OnDestroy {
           if(target === 'users') {
             return this.usersService.getUsers(this.pageSize, 1)
           }
-          return this.streamService.getStreams(this.pageSize, 1);
+          if(target === 'streams') {
+            return this.streamService.getStreams(this.pageSize, 1);
+          }
+          return this.courseService.getCourseList(this.pageSize, 1);
         }),
         takeUntil(this.destroy$)
       )
       .subscribe(response => {
-        if (this.searchTarget.value === 'streams') {
-          this.streamList = response.data as Stream[];
-          this.totalPages = response.totalPages;
-        } else {
-          this.usersList = response.data as UserResponse[];
-          this.totalPages = response.totalPages;
-        }
+        this.setResponse(response)
       })
 
     this.name.valueChanges
@@ -55,20 +62,32 @@ export class SearchComponent implements OnInit, OnDestroy {
           if(this.searchTarget.value === 'users') {
             return this.usersService.getUsers(this.pageSize, 1, name!)
           }
-          return this.streamService.getStreams(this.pageSize, 1, name!);
+          if(this.searchTarget.value === 'streams') {
+            return this.streamService.getStreams(this.pageSize, 1, name!);
+          }
+          return this.courseService.getCourseList(this.pageSize, 1, name!);
         }),
         takeUntil(this.destroy$)
       )
       .subscribe(response => {
-        if (this.searchTarget.value === 'streams') {
-          this.streamList = response.data as Stream[];
-          this.totalPages = response.totalPages;
-        } else {
-          this.usersList = response.data as UserResponse[];
-          this.totalPages = response.totalPages;
-        }
+        this.setResponse(response)
         this.currentPage = 1;
       })
+  }
+
+  private setResponse(response:  UsersListResponse | StreamListResponse | CourseListResponse): void {
+    if (this.searchTarget.value === 'streams') {
+      this.streamList = response.data as Stream[];
+      this.totalPages = response.totalPages;
+    }
+    if (this.searchTarget.value === 'users') {
+      this.usersList = response.data as UserResponse[];
+      this.totalPages = response.totalPages;
+    }
+    if (this.searchTarget.value === 'courses') {
+      this.coursesList = response.data as Course[];
+      this.totalPages = response.totalPages;
+    }
   }
 
   public onScroll():void {

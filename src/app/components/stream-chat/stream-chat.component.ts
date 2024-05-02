@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ChatService} from "../../service/chat.service";
 import {AuthService} from "../../service/auth.service";
 import {LiveMessage, LiveMessageTypes} from "../../shared/interfaces/params";
@@ -12,7 +12,7 @@ import {RestrictionResponse} from "../../shared/interfaces/responses";
   templateUrl: './stream-chat.component.html',
   styleUrls: ['./stream-chat.component.css']
 })
-export class StreamChatComponent implements OnInit {
+export class StreamChatComponent implements OnInit, OnDestroy {
   @Input() id!: number;
   @Input() creator: boolean = false;
   @Input() moderator: boolean = false;
@@ -87,5 +87,9 @@ export class StreamChatComponent implements OnInit {
 
   public deleteMessage(id: number): void {
     this.chatService.deleteMessage(id);
+  }
+
+  ngOnDestroy(): void {
+    this.chatService.disconnect();
   }
 }

@@ -1,0 +1,150 @@
+h1 sup {
+  padding: 5px;
+  border: 1px solid gray;
+  font-size: 12px;
+  border-radius: 12px;
+  background: lightgray;
+  color: gray;
+}
+
+h1 sup.active {
+  background: azure;
+  color: darkgreen;
+  border-color: darkgreen;
+}
+
+h1 sup.async {
+  background: violet;
+  color: darkmagenta;
+  border-color: darkmagenta;
+}
+
+.controls {
+  margin: 16px auto;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 30px;
+}
+
+.creator-info {
+  color: gray;
+}
+
+.plans {
+  list-style: none;
+  padding: 0;
+}
+
+.plans li mat-card {
+  background: lightgray;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.plans li mat-card.passed {
+  background: #d0f6d0;
+}
+
+.plans li {
+  margin-bottom: 15px;
+}
+
+.plans li .async {
+  color: darkmagenta;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.plans .mark {
+  font-size: 24px;
+  font-weight: 600;
+  color: darkgreen;
+}
+
+.total-mark {
+  margin: 25px auto 0;
+  width: fit-content;
+  font-size: 18px;
+}
+
+.mark-hint {
+  font-size: 10px;
+  margin: 0 auto 20px;
+  width: fit-content;
+}
+
+.plans .mark.no-passed {
+  color: darkred;
+}
+
+.plans p, .plans h3 {
+  margin: 0;
+}
+
+.plans h3 {
+  text-decoration: underline;
+}
+
+.controls button {
+  margin: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.container {
+  max-width: 1600px;
+  padding: 0 16px 30px;
+  margin: 0 auto;
+}
+
+.range {
+  display: flex;
+  width: fit-content;
+  gap: 20px;
+  margin: 0 auto;
+}
+
+.certificate {
+  width: fit-content;
+  margin: 40px auto;
+}
+
+.certificate p {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+
+.full-width {
+  width: 100%;
+  min-height: 300px;
+}
+
+::ng-deep .full-width .mat-mdc-text-field-wrapper textarea.mat-mdc-form-field-input-control {
+  height: 300px;
+}
+
+.assignment-choser {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.plan-controls {
+  margin: 10px auto;
+  width: fit-content;
+}
+
+.plan-event {
+  cursor: pointer;
+}

@@ -51,8 +51,22 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
     private readonly router: Router,
   ) {}
 
-  @ViewChild('video') player!: ElementRef<HTMLVideoElement>;
-  @ViewChild('video2') player2!: ElementRef<HTMLVideoElement>;
+  public source!: SafeResourceUrl;
+  public source2!: SafeResourceUrl;
+  @ViewChild('video2') video2!: ElementRef<HTMLVideoElement>;
+  @ViewChild('video') video!: ElementRef<HTMLVideoElement>;
+  @ViewChild('player') player!: ElementRef<HTMLElement>;
+
+  private currentPlayer!: HTMLVideoElement;
+  private nextPlayer!: HTMLVideoElement | null;
+  private isNextReady: boolean = false;
+  public loading: boolean = true;
+  private isdFirstLoad: boolean = true;
+  private isSwitched: boolean = false;
+  public firstFrame: boolean = true;
+  public fetched: boolean = false;
+  public isPlaying = false;
+  public showStartButton = false;
 
   public ngOnInit(): void {
     this.loadStream();
@@ -77,8 +91,71 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
       })
   }
 
-  public get isVideoLoading() {
-    return (!this.nextSrc && this.activePart === 1) || (!this.currentSrc && this.activePart === 0)
+  public async progress(event: Event): Promise<void> {
+    const target = event.target as HTMLVideoElement;
+
+    if (target.currentTime > target.duration * 0.7 && !this.nextPlayer) {
+      this.setNextPlayer();
+      this.isSwitched = false;
+      this.getFrame(this.part + this.activePart);
+      return
+    }
+  }
+
+  public async switchPlayer(): Promise<void> {
+    if (this.isEnded) return;
+
+    this.isSwitched = true;
+    await this.tryPlayNext();
+    this.activePart++;
+    this.firstFrame = false;
+    this.currentPlayer = this.nextPlayer!;
+    this.setNextSource('');
+    this.nextPlayer = null;
+  }
+
+  private async tryPlayNext(): Promise<void> {
+    while(!this.isNextReady) {
+      if (this.isEnded) return;
+      this.loading = true;
+      await new Promise<void>(res => setTimeout(async () => res(), 200));
+    }
+    this.loading = false;
+    await this.nextPlayer?.play();
+  }
+
+  private setNextSource(source: SafeResourceUrl): void {
+    this.isNextReady = false;
+    if (this.currentPlayer === this.video.nativeElement) {
+      this.source2 = source;
+      return;
+    }
+    this.source = source;
+  }
+
+  private setNextPlayer(): void {
+    if (this.currentPlayer === this.video.nativeElement) {
+      this.nextPlayer = this.video2.nativeElement;
+      return;
+    }
+
+    this.nextPlayer = this.video.nativeElement;
+  }
+
+  public setTime(event: Event): void {
+    if (!this.currentPlayer) {
+      this.currentPlayer = this.video.nativeElement;
+    }
+    if (this.isdFirstLoad) {
+      this.isdFirstLoad = false;
+      this.loading = false;
+    }
+    this.isNextReady = true;
+  }
+
+  public get isFirstVideo(): boolean {
+    if (!this.video) return true;
+    return this.currentPlayer === this.video.nativeElement;
   }
 
   private loadStream(): void {
@@ -95,7 +172,7 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
           if(stream) {
             this.isEnded = false;
             this.streamLive = true;
-            this.streamData = { ...stream.data, viewers:0 };
+            this.streamData = { ...stream.data, viewers: 0 };
             this.isModerator = stream.isModerator;
             this.authorMode = stream.data.userId === this.authService.authedId.getValue();
           }
@@ -118,20 +195,25 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
       })
   }
 
-  public onLoad() {
-    if(this.activePart % 2 === 1) {
-      this.player.nativeElement.play();
-    } else {
-      this.player2.nativeElement.play();
-    }
+  public onLoad(event: Event): void {
+    if (this.isEnded) return;
+
+    event.preventDefault();
+    this.currentPlayer.play();
+    this.currentPlayer.focus();
   }
 
-  public pause() {
-    if(this.activePart % 2 === 1) {
-      this.player.nativeElement.pause();
-    } else {
-      this.player2.nativeElement.pause();
-    }
+  public pause(event: Event): void {
+    if (this.isEnded) return;
+
+    event.preventDefault();
+    this.currentPlayer.pause();
+    setTimeout(() => this.player.nativeElement.focus());
+    this.isPlaying = false;
+  }
+
+  public onPlay() {
+    this.isPlaying = true;
   }
 
   public reportStream(): void {
@@ -158,47 +240,38 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
       })
   }
 
-  public onEnded() {
-    if(this.isEnded) return;
-
-    this.activePart++;
-    this.loaded = false;
-
-    if(this.activePart % 2 === 0 && this.nextSrc) {
-      this.currentSrc = '';
-      this.player2.nativeElement.play();
-    } else if(this.activePart % 2 === 1 && this.currentSrc) {
-      this.nextSrc = '';
-      this.player.nativeElement.play();
-    }
-  }
-
   private getFrame(part?: number) {
+    this.fetched = false;
     this.streamService.getFrame(this.streamData.id, part)
       .pipe(
         takeUntil(this.destroy$)
       )
       .subscribe({
         next:buff => {
+          this.fetched = true;
           const blob = new Blob([buff])
           const blobURL = URL.createObjectURL(blob);
           if(!this.part) {
             this.part = part!;
           }
           if (!this.activePart) {
-            this.currentSrc = this.sanitizer.bypassSecurityTrustResourceUrl(blobURL);
+            this.source = this.sanitizer.bypassSecurityTrustResourceUrl(blobURL);
             this.activePart = 1;
           } else {
-            this.srcStream.next(this.sanitizer.bypassSecurityTrustResourceUrl(blobURL));
+            this.setNextSource(this.sanitizer.bypassSecurityTrustResourceUrl(blobURL));
           }
         },
-        error: this.errorCatcher.bind(this)
+        error: this.errorCatcher.bind(this),
+        complete: () => window.setTimeout(() => {
+          if (this.fetched) return;
+          this.getFrame(this.part + this.activePart)
+        }, 1000)
       })
-
   }
   private errorCatcher(error: number) {
+    this.fetched = true;
     if(error === 404) {
-      window.setTimeout(() => this.getFrame(this.part + this.activePart), 500)
+      window.setTimeout(() => this.getFrame(this.part + this.activePart), 1000)
     }
     if(error === 405) {
       this.isEnded = true;
@@ -206,23 +279,15 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async startRecording(): Promise<void> {
-    this.stream = await window.navigator.mediaDevices.getUserMedia(this.mediaConstraints);
+  public async startRecording(): Promise<void> {
+    this.showStartButton = false;
+    if (this.streamData.type === 1) {
+      this.stream = await window.navigator.mediaDevices.getUserMedia(this.mediaConstraints);
+    } else {
+      this.stream = await window.navigator.mediaDevices.getDisplayMedia(this.mediaConstraints);
+    }
+    this.stream.getVideoTracks()[0].addEventListener('ended', () => this.showStartButton = true)
     this.recordFrame();
-  }
-
-  public onTimeUpdate(event: Event): void {
-    if (this.loaded) {
-      return
-    }
-    if(this.activePart % 2 == 0 && (this.player2.nativeElement.duration - this.player2.nativeElement.currentTime < 2.5)) {
-      this.getFrame(this.part + this.activePart);
-      this.loaded = true;
-    }
-    if(this.activePart % 2 == 1 && (this.player.nativeElement.duration - this.player.nativeElement.currentTime < 2.5)) {
-      this.getFrame(this.part + this.activePart);
-      this.loaded = true;
-    }
   }
 
   private async recordFrame(): Promise<void> {
@@ -286,6 +351,6 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.chatService.connected$.next(0);
   }
-
 }

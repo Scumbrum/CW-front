@@ -25,6 +25,7 @@ import { StreamDetailsComponent } from './pages/stream-details/stream-details.co
 import {ChatModule} from "@progress/kendo-angular-conversational-ui";
 import { StreamChatComponent } from './components/stream-chat/stream-chat.component';
 import { UsersListComponent } from './components/users-list/users-list.component';
+import { CourseDetailsComponent } from './pages/course-details/course-details.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { UsersListComponent } from './components/users-list/users-list.component
     NotificationModalComponent,
     StreamDetailsComponent,
     StreamChatComponent,
-    UsersListComponent
+    UsersListComponent,
+    CourseDetailsComponent
   ],
     imports: [
         BrowserModule,

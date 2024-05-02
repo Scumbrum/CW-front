@@ -1,24 +1,50 @@
 <ng-container *ngIf="streamData && streamLive; else noStream">
   <div class="container">
     <video class="author-video" *ngIf="streamLive && authorMode" [srcObject]="stream" [muted]="true" autoplay></video>
-    <div class="video-controlls" *ngIf="!authorMode">
-      <button (click)="onLoad()" mat-raised-button  color="primary">Play</button>
-      <button (click)="pause()" mat-raised-button  color="primary">Stop</button>
+    <div class="video-controlls" *ngIf="showStartButton">
+      <button (click)="startRecording()" mat-raised-button  color="primary">Start again</button>
     </div>
-    <div *ngIf="!authorMode" class="video-container">
+    <div *ngIf="!authorMode && (source || source2)" class="video-container">
       <video
         #video
-        [hidden]="activePart % 2 === 0"
-        [src]="currentSrc" (ended)="onEnded()"
-        (timeupdate)="onTimeUpdate($event)"
+        autofocus
+        [tabindex]="isFirstVideo && isPlaying ? 0 : -1"
+        [autoplay]="firstFrame"
+        [style.opacity]="isFirstVideo ? 1 : 0"
+        [src]="source"
+        (click)="pause($event)"
+        (play)="onPlay()"
+        (keydown.space)="pause($event)"
+        (loadeddata)="setTime($event)"
+        (ended)="switchPlayer()"
+        (timeupdate)="progress($event)"
       ></video>
       <video
         #video2
-        [hidden]="activePart % 2 === 1"
-        [src]="nextSrc" (ended)="onEnded()"
-        (timeupdate)="onTimeUpdate($event)"
+        [tabindex]="isFirstVideo && isPlaying ? 0 : -1"
+        [style.opacity]="isFirstVideo ? 0 : 1"
+        (timeupdate)="progress($event)"
+        (ended)="switchPlayer()"
+        (keydown.space)="pause($event)"
+        (loadeddata)="setTime($event)"
+        (click)="pause($event)"
+        (play)="onPlay()"
+        [src]="source2"
       ></video>
-      <app-loading *ngIf="isVideoLoading"></app-loading>
+      <div *ngIf="loading" class="loader-overlay">
+        <div class="loader"></div>
+      </div>
+      <div
+        #player
+        autofocus
+        *ngIf="!isPlaying"
+        tabindex="0"
+        (click)="onLoad($event)"
+        (keydown.space)="onLoad($event)"
+        class="loader-overlay"
+      >
+        <mat-icon class="play">play_arrow</mat-icon>
+      </div>
     </div>
     <div class="action-panel">
       <h2> {{ streamData.name }} </h2>

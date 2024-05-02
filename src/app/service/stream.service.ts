@@ -68,6 +68,10 @@ export class StreamService {
     return this.api.post<StreamData, Stream>(this.baseurl, streamData);
   }
 
+  public startStream(id: number): Observable<Stream> {
+    return this.api.put<Object, Stream>(`${this.baseurl}/${id}/start`, {});
+  }
+
   public reportStream(id: number): Observable<ReportResponse> {
     return this.api.post<undefined, ReportResponse>(`${this.baseurl}/${id}/report`, undefined);
   }

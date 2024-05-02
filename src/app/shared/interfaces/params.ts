@@ -27,6 +27,7 @@ export interface StreamData {
   name: string;
   moderators: number[]
   dateStart: string;
+  type: number;
 }
 
 export enum LiveMessageTypes {
@@ -46,4 +47,30 @@ export interface LiveMessage {
   userId: number;
   date: string;
   name: string
+}
+
+export interface SelectOption {
+  id: number;
+  label: string;
+}
+
+export interface CourseRequestData {
+  name: string;
+  description: string;
+  dateEnd: string;
+  dateStart: string
+}
+
+export interface PlanItemRequestData {
+  streamId: number;
+  assignmentId: number;
+}
+
+export interface PlanItemRequestData {
+  streamId: number;
+  assignmentId: number;
+}
+export interface PlanRequestData {
+  courseId: number;
+  plans: PlanItemRequestData[];
 }

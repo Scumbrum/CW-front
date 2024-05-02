@@ -17,6 +17,11 @@ h3 {
   font-size: 18px;
 }
 
+.controls {
+  display: flex;
+  gap: 25px;
+}
+
 .chooser {
   display: flex;
   justify-content: space-between;

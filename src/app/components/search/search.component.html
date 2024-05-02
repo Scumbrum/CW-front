@@ -17,22 +17,28 @@
           [infiniteScrollThrottle]="50"
           (scrolled)="onScroll()"
           [scrollWindow]="false">
-        <ng-container *ngIf="searchTarget.value === 'streams'; else users">
+        <ng-container *ngIf="searchTarget.value === 'streams'">
           <mat-option [routerLink]="['/stream', stream.id]" *ngFor="let stream of streamList" [value]="stream.name" [fragment]="stream.name">
             {{ stream.name }}
           </mat-option>
         </ng-container>
-        <ng-template #users>
+        <ng-container *ngIf="searchTarget.value === 'users'">
           <mat-option [routerLink]="['/profile', user.id]" *ngFor="let user of usersList" [value]="user.name" [fragment]="user.name">
             {{ user.name }}
           </mat-option>
-        </ng-template>
+        </ng-container>
+        <ng-container *ngIf="searchTarget.value === 'courses'">
+          <mat-option [routerLink]="['/course', course.id]" *ngFor="let course of coursesList" [value]="course.name" [fragment]="course.name">
+            {{ course.name }}
+          </mat-option>
+        </ng-container>
       </div>
     </mat-autocomplete>
   </mat-form-field>
   <mat-radio-group [formControl]="searchTarget">
     <mat-radio-button value="users">Users</mat-radio-button>
     <mat-radio-button value="streams">Streams</mat-radio-button>
+    <mat-radio-button value="courses">Courses</mat-radio-button>
   </mat-radio-group>
 </form>
 

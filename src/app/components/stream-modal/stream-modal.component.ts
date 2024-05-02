@@ -8,6 +8,8 @@ import {StreamService} from "../../service/stream.service";
 import {D} from "@angular/cdk/keycodes";
 import {Router} from "@angular/router";
 import {ROUTES} from "../../constants/routes";
+import {SelectOption} from "../../shared/interfaces/params";
+import {ToastrService} from "../../service/toastr.service";
 
 @Component({
   selector: 'app-stream-modal',
@@ -23,12 +25,26 @@ export class StreamModalComponent implements OnInit, OnDestroy{
   private totalPages!: number;
   public userQuery = new FormControl('' );
   public streamName = new FormControl('', [Validators.required]);
+  public streamType = new FormControl(1, [Validators.required]);
+  public dateStart = new FormControl(new Date(), [Validators.required]);
   private destroy$ = new Subject<void>();
+
+  public typeList: SelectOption[] = [
+    {
+      id: 1,
+      label: 'Camera'
+    },
+    {
+      id: 2,
+      label: 'Screen'
+    }
+  ]
   constructor(
     private readonly usersService: UsersService,
     private readonly streamService: StreamService,
     private readonly dialogRef: MatDialogRef<StreamModalComponent>,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly toastrService: ToastrService
   ) {}
 
   public close(): void {
@@ -66,14 +82,23 @@ export class StreamModalComponent implements OnInit, OnDestroy{
   public onSubmit():void {
     this.streamName.markAsTouched();
     if(!this.dataValid) return
-    const date = this.streamService.dateToString(new Date());
+    const date = this.streamService.dateToString(this.dateStart.value!);
     const moderators =  this.selectedModerators.map(moderator => moderator.id);
-    this.streamService.createStream({name: this.streamName.value!, moderators, dateStart: date })
+    this.streamService.createStream({
+      name: this.streamName.value!,
+      moderators,
+      dateStart: date,
+      type: this.streamType.value!
+    })
       .pipe(
         takeUntil(this.destroy$)
       )
       .subscribe(response => {
-        this.router.navigate(['stream', response.id]);
+        if (response.planed) {
+          this.toastrService.setSuccess('Stream created')
+        } else {
+          this.router.navigate(['stream', response.id]);
+        }
         this.dialogRef.close();
       })
   }

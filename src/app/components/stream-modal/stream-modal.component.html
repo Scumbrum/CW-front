@@ -3,6 +3,22 @@
   <mat-form-field>
     <input class="stream-name-controller" [formControl]="streamName" type="text" matInput placeholder="Stream title">
   </mat-form-field>
+  <div class="controls">
+    <mat-form-field appearance="fill">
+      <mat-label>Type</mat-label>
+      <mat-select [formControl]="streamType">
+        <mat-option *ngFor="let type of typeList" [value]="type.id">{{type.label}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>End date</mat-label>
+      <input [formControl]="dateStart" matInput [matDatepicker]="picker">
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
   <h3>Moderators</h3>
   <div class="chooser">
     <div class="users-picker">

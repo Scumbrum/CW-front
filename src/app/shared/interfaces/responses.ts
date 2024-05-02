@@ -57,6 +57,17 @@ export interface Stream {
   viewers: number;
   reports: number;
   dateStart: string;
+  type: number;
+  planed: boolean;
+}
+
+export interface Course {
+  id: number;
+  name: string;
+  userId: number;
+  userName: string;
+  dateStart: string;
+  dateEnd: string;
 }
 
 export interface StreamResponse {
@@ -68,6 +79,59 @@ export interface StreamResponse {
 export interface StreamListResponse {
   data: Stream[],
   totalPages: number,
+}
+
+export interface CourseListResponse {
+  data: Course[],
+  totalPages: number,
+}
+
+export interface CourseDetailsData extends Course{
+  description: string;
+  isPassed: boolean;
+  isSubscribed: boolean;
+}
+
+export interface Assignment {
+  id: number;
+  name: string;
+  type: number;
+  time: number;
+  minimumScore: number;
+  userId: number;
+}
+
+export interface AssignmentResponse {
+  data: Assignment[];
+  totalPages: number;
+}
+
+export interface PlanItem {
+  courseId: number;
+  name: string;
+  assignmentId: number | null;
+  assignmentName: string | null;
+  minimumScore: number | null;
+  streamId: number;
+  planItemId: number;
+  startDate: string;
+  streamName: string;
+  isActive: boolean;
+  recordId: number | null;
+  isPassed: boolean | null;
+  isAsync: boolean | null;
+  passDate: string | null;
+  score: number | null;
+}
+
+export interface CourseDataWithPlan {
+  data: CourseDetailsData;
+  plan: PlanItem[];
+}
+
+export interface CourseSubscription {
+  userId: number;
+  courseId: string;
 }
 
 export interface FrameResponse {

@@ -4,5 +4,6 @@ export enum ROUTES {
   HOME = '',
   PROFILE = 'profile',
   OTHER_PROFILE = 'profile/:id',
-  STREAM_DETAILS = 'stream/:id'
+  STREAM_DETAILS = 'stream/:id',
+  COURSE_DETAILS = 'course/:id'
 }

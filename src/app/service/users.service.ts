@@ -38,6 +38,16 @@ export class UsersService {
     })
     return this.api.get<StreamListResponse>(`${this.baseUrl}/${userId}/ended`, params)
   }
+
+  public getPlanedStreams(name: string, userId: number): Observable<Stream[]> {
+    const params = new HttpParams({
+      fromObject: {
+        name
+      }
+    })
+    return this.api.get<Stream[]>(`${this.baseUrl}/${userId}/planed`, params)
+  }
+
   public subscribe(id: number): Observable<UserResponse> {
     return this.api.post<SubscriptionData, UserResponse>(`${this.baseUrl}/subscription`, { target: id })
   }

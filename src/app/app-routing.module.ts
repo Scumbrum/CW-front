@@ -9,6 +9,7 @@ import {AuthGuard} from "./guards/auth.guard";
 import {RegisterGuard} from "./guards/register.guard";
 import {ProfileComponent} from "./pages/profile/profile.component";
 import {StreamDetailsComponent} from "./pages/stream-details/stream-details.component";
+import {CourseDetailsComponent} from "./pages/course-details/course-details.component";
 
 const routes: Route[] = [
   {path: ROUTES.AUTH, component: AuthComponent, canActivate: [RegisterGuard]},
@@ -16,7 +17,8 @@ const routes: Route[] = [
   {path: ROUTES.REGISTRATION, component: RegistrationComponent, canActivate: [RegisterGuard]},
   {path: ROUTES.PROFILE, component: ProfileComponent, canActivate: [AuthGuard]},
   {path: ROUTES.OTHER_PROFILE, component: ProfileComponent, canActivate: [AuthGuard]},
-  {path: ROUTES.STREAM_DETAILS, component: StreamDetailsComponent, canActivate: [AuthGuard]}
+  {path: ROUTES.STREAM_DETAILS, component: StreamDetailsComponent, canActivate: [AuthGuard]},
+  {path: ROUTES.COURSE_DETAILS, component: CourseDetailsComponent, canActivate: [AuthGuard]}
 ]
 
 @NgModule({

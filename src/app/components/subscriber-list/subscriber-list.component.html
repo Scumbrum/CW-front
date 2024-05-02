@@ -6,4 +6,11 @@
     {{ subsctibe.name }}
   </mat-list-item>
 </mat-list>
-
+<h2>Course Subscriptions</h2>
+<mat-paginator [pageSize]="pageCourseSize" [length]="totalCourses" [hidePageSize]="true" (page)="loadCourseMore($event)" aria-label="Select page">
+</mat-paginator>
+<mat-list role="list">
+  <mat-list-item class="mat-mdc-list-item-interactive" *ngFor="let subsctibe of courseSubscription" role="listitem" [routerLink]="['/course', subsctibe.id]" >
+    {{ subsctibe.name }}
+  </mat-list-item>
+</mat-list>

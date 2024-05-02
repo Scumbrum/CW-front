@@ -20,6 +20,10 @@ export class ChatService {
     private authService: AuthService
   ) {}
 
+  public disconnect(): void {
+    this.ws.close();
+  }
+
   private initChat(streamId: number, messageType: LiveMessageTypes, userId?: number) {
     const data = {
       streamId,
