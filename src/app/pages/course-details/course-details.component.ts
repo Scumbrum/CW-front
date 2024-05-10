@@ -1,13 +1,27 @@
 import {Component, OnInit} from '@angular/core';
 import {CourseService} from "../../service/course.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {EMPTY, Observable, Subject, switchMap, takeUntil, zip} from "rxjs";
-import {Assignment, Course, CourseDataWithPlan, PlanItem, Stream} from "../../shared/interfaces/responses";
+import {EMPTY, map, Observable, Subject, switchMap, takeUntil, zip} from "rxjs";
+import {
+  Assignment,
+  AssignmentDetails,
+  Course,
+  CourseDataWithPlan, Plan,
+  PlanItem,
+  Stream, UserAssignmentResponse
+} from "../../shared/interfaces/responses";
 import {AuthService} from "../../service/auth.service";
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {DatePipe} from "@angular/common";
 import {StreamService} from "../../service/stream.service";
 import {UsersService} from "../../service/users.service";
+import {MatDialog} from "@angular/material/dialog";
+import {StreamModalComponent} from "../../components/stream-modal/stream-modal.component";
+import {CourseModalComponent} from "../../components/course-modal/course-modal.component";
+import {ToastrService} from "../../service/toastr.service";
+import {AssignmentAddRequest, Task} from "../../shared/interfaces/params";
+import {TestKey} from "@angular/cdk/testing";
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 
 @Component({
   selector: 'app-course-details',
@@ -39,12 +53,16 @@ export class CourseDetailsComponent implements OnInit {
     private readonly datePipe: DatePipe,
     private readonly streamService: StreamService,
     private readonly fb: FormBuilder,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly dialog: MatDialog,
+    private readonly toastrService: ToastrService,
+    private readonly sanitizer: DomSanitizer
   ) {
   }
 
   public ngOnInit(): void {
     this.buildForm();
+
     this.activatedRoute.params
       .pipe(
         switchMap(params => {
@@ -58,6 +76,7 @@ export class CourseDetailsComponent implements OnInit {
       ).subscribe(response => {
         this.details = response;
         this.isMyCourse = this.details.data.userId === this.authService.authedId.getValue()
+          || this.authService.authedRole.getValue() === 'admin'
     })
   }
 
@@ -72,6 +91,26 @@ export class CourseDetailsComponent implements OnInit {
       .pipe(takeUntil(this.searcherDestroy))
       .subscribe(value => this.filteredStreams = this.planedStreams
         .filter(item => item.name.toLowerCase().includes(value!.toLowerCase())))
+  }
+
+  public addStream(): void {
+    const modal = this.dialog.open(StreamModalComponent, {
+      data: {
+        onlyPlan: true
+      }
+    });
+
+    modal.afterClosed()
+      .subscribe((stream) => {
+        console.log(stream)
+        if (!stream) return;
+        this.planedStreams = [
+          ...this.planedStreams,
+          stream
+        ];
+
+        this.filteredStreams = this.planedStreams;
+      })
   }
 
   private listenAssignments(): void {
@@ -260,11 +299,48 @@ export class CourseDetailsComponent implements OnInit {
   public startStream(plan: PlanItem): void {
     if (this.isMyCourse && !plan.isActive) {
       this.streamService.startStream(plan.streamId)
-        .subscribe(() => this.router.navigate(['/stream', plan.streamId]))
+        .subscribe(() => this.openInNewWindow(['/stream', plan.streamId]))
     } else {
-      this.router.navigate(['/stream', plan.streamId])
-    }
+      if (!plan.assignmentId && !plan.isPassed) {
+        this.courseService.markPlanAsDone(plan.planItemId).subscribe()
+      }
 
+      if (new Date(plan.startDate).valueOf() < new Date().valueOf() && !plan.isActive) {
+        this.streamService.getRecordStream(plan.streamId)
+          .subscribe(data => this.streamService.downLoadFile(data, 'video\/mp4'))
+      }
+
+      if (plan.isActive) {
+        this.openInNewWindow(['/stream', plan.streamId]);
+      }
+    }
+  }
+
+  public assignmentHandler(id: number): void {
+    if (this.isMyCourse) {
+      this.courseService.openAssignmentEditModal(id)
+        .subscribe(() => this.toastrService.setSuccess('Assignment successfully updated'))
+    } else {
+      this.openInNewWindow(['/assignment', id])
+    }
+  }
+
+  public addAssignment(): void {
+    const modal = this.dialog.open(CourseModalComponent)
+
+    modal.afterClosed()
+      .pipe(
+        switchMap(value => this.courseService.addAssignment(value))
+      )
+      .subscribe(value => {
+        this.assignments = [
+          ...this.assignments,
+          value.data
+        ];
+
+        this.filteredAssignments = this.assignments;
+        this.toastrService.setSuccess('Assignment was added')
+      })
   }
 
   public isPlanValid(): boolean {
@@ -288,9 +364,29 @@ export class CourseDetailsComponent implements OnInit {
     return this.details.plan.reduce((acc, item) => acc + (item.score || 0), 0);
   }
 
-  public get certificateUrl(): string {
-    if (!this.details) return '';
-    return this.courseService.getCertificateUrl(this.details.data.id)
+  public get certificateUrl(): Observable<SafeResourceUrl> {
+    return this.courseService.getCertificateUrl(this.details!.data.id)
+      .pipe(map(url => this.sanitizer.bypassSecurityTrustResourceUrl(url)))
+  }
+
+  public openInNewWindow(url: any[]): void {
+    const urlSerialized = this.router.serializeUrl(
+      this.router.createUrlTree(url)
+    );
+
+    window.open(urlSerialized, '_blank');
+  }
+
+  public getStreamLabel(id: number): string {
+    return this.planedStreams.find(stream => stream.id === id)!.name;
+  }
+
+  public isSelectedStreamInList(id: number): boolean {
+    return this.planedStreams.some(stream => stream.id === id);
+  }
+
+  public isRecordStarted(plan: PlanItem): boolean {
+    return !!plan.assignmentId && new Date(plan.startDate).valueOf() <= new Date().valueOf()
   }
 
   public deleteSubscription(): void {

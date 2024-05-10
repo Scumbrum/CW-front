@@ -57,6 +57,8 @@ export interface Stream {
   viewers: number;
   reports: number;
   dateStart: string;
+  assignmentId: string | null;
+  planItemId: string | null;
   type: number;
   planed: boolean;
 }
@@ -99,6 +101,7 @@ export interface Assignment {
   time: number;
   minimumScore: number;
   userId: number;
+
 }
 
 export interface AssignmentResponse {
@@ -123,6 +126,20 @@ export interface PlanItem {
   passDate: string | null;
   score: number | null;
 }
+export interface UserAssignment extends PlanItem {
+  userId: number;
+  userName: string;
+}
+
+export interface UserAssignmentResponse extends PlanItem {
+  data: UserAssignment[];
+  total: number;
+}
+
+export interface PlanItemResponse {
+  data: PlanItem[];
+  total: number;
+}
 
 export interface CourseDataWithPlan {
   data: CourseDetailsData;
@@ -146,4 +163,61 @@ export interface RestrictionResponse {
 
 export interface ReportResponse {
   reports: number
+}
+
+export interface AnswerCase {
+  answerCaseId: number;
+  answerCaseText: string;
+  isAnswerCorrect: number; // Assuming 0 represents false and 1 represents true
+}
+
+export interface Question {
+  taskType: number;
+  taskId: number;
+  question: string;
+  correctAnswer: any; // You might want to specify the correct answer type if it's known
+  taskScore: number;
+  correctComment: string;
+  userScore: number | null;
+  isUserCorrect: boolean | null;
+  userComment: string | null;
+  answerCases: AnswerCase[];
+  chosenAnswers: number[]; // You might want to specify the chosen answer type if it's known
+  multiple: boolean;
+}
+
+export interface AssignmentData extends Assignment {
+  planItemId: number | null;
+  streamId: number | null;
+  passDate: string | null;
+  recordId: number | null;
+  dateStart: string | null;
+}
+
+export interface AssignmentDetails {
+  data: AssignmentData;
+  questions: Question[];
+}
+
+export interface Plan {
+  planItemId: number;
+  userId: number;
+  isPassed: boolean;
+  isAsync: boolean;
+  score: number;
+  passDate: string;
+}
+
+export interface Answer {
+  taskId: number;
+  userId: number;
+  score: number;
+  isCorrect: boolean;
+  chosenAnswers: number[];
+}
+
+export interface UserAssignmentResponse {
+  plan: Plan;
+  answers: Answer[];
+  isCertificateReady: boolean;
 }

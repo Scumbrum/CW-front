@@ -20,9 +20,16 @@
           </div>
         </mat-list>
       </mat-menu>
-      <button [routerLink]="['/profile']" mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+      <button [cdkMenuTriggerFor]="navManu" #menu mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
         <mat-icon>person</mat-icon>
       </button>
+      <ng-template #navManu>
+        <div cdkMenu class="nav-menu mat-elevation-z3">
+          <p [routerLink]="['/profile']">Profile</p>
+          <p [routerLink]="['/certificates']" *ngIf="currentRole === 'user'">Certificates</p>
+          <p [routerLink]="['/my-plans']" *ngIf="currentRole === 'user'">Plan</p>
+        </div>
+      </ng-template>
     </ng-container>
   </mat-toolbar>
 </p>

@@ -11,6 +11,11 @@ form  {
   width: 50%;
 }
 
+.select {
+  padding: 10px;
+  background: lightgray;
+}
+
 h2 {
   text-align: center;
   margin-bottom: 0;
@@ -63,19 +68,37 @@ li h3 {
   display: flex;
   justify-content: space-between;
   margin: 0 auto 20px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .centred {
   justify-content: center;
 }
 
-.streams {
-  justify-content: space-between;
+:host ::ng-deep .assignments .mat-mdc-list-item-unscoped-content {
   display: flex;
-  width: 50%;
-  margin-top: 25px;
+  justify-content: space-between;
 }
 
-.streams .list {
-  width: 40%;
+:host ::ng-deep .assignments .mat-mdc-list-item-unscoped-content span {
+  width: 100%;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+:host ::ng-deep .assignments .mat-mdc-list-item-unscoped-content .controls {
+  display: flex;
+  gap: 15px;
+}
+
+.streams {
+  display: grid;
+  grid-template-columns: repeat(2, 40%);
+  justify-content: space-between;
+  width: 50%;
+  margin-top: 25px;
+  gap: 25px;
 }

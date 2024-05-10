@@ -119,10 +119,17 @@
                 <button
                   mat-raised-button
                   *ngIf="item.assignmentId"
-                  [routerLink]="['/assignment', item.assignmentId]"
+                  (click)="assignmentHandler(item.assignmentId)"
                 >
                   Assignment
                 </button>
+              <button
+                mat-raised-button
+                *ngIf="isRecordStarted(item)"
+                (click)="openInNewWindow(['/user-assignments', item.planItemId])"
+              >
+                Records
+              </button>
                 <button
                   mat-raised-button
                   (click)="startStream(item)"
@@ -144,7 +151,16 @@
                     <mat-label>Name</mat-label>
                     <input [formControl]="searchStream" matInput>
                   </mat-form-field>
-                  <mat-option *ngIf="!filteredStreams?.length" [value]="item.value.streamId">{{ details.plan[i].streamName }}</mat-option>
+                  <mat-option
+                    *ngIf="itemForm(i).controls['streamId'] && !filteredStreams.length"
+                    [value]="itemForm(i).controls['streamId']">
+                    {{ getStreamLabel(itemForm(i).controls['streamId'].value) }}
+                  </mat-option>
+                  <mat-option
+                    *ngIf="details.plan[i].streamId && !isSelectedStreamInList(details.plan[i].streamId)"
+                    [value]="details.plan[i].streamId">
+                    {{ details.plan[i].streamName }}
+                  </mat-option>
                   <mat-option
                     *ngFor="let stream of filteredStreams"
                     [value]="stream.id">
@@ -155,7 +171,11 @@
               <button mat-raised-button [routerLink]="['/stream', item.value.streamId]">
                 Stream
               </button>
-              <button mat-raised-button color="primary">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="addStream()"
+              >
                 Add
               </button>
             </div>
@@ -178,10 +198,14 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <button mat-raised-button *ngIf="item.value.assignmentId" [routerLink]="['/assignment', item.value.assignmentId]">
+              <button
+                mat-raised-button
+                *ngIf="item.value.assignmentId"
+                (click)="assignmentHandler(item.value.assignmentId)"
+              >
                 Assignment
               </button>
-              <button mat-raised-button color="primary">
+              <button mat-raised-button color="primary" (click)="addAssignment()">
                 Add
               </button>
             </div>
@@ -221,7 +245,7 @@
   </ng-container>
   <div class="certificate" *ngIf="details?.data?.isPassed">
     <p>Congratulation!!! Here is your certificate:</p>
-    <object height="320" width="400" type="application/pdf" [data]="certificateUrl">
+    <object height="320" width="400" type="application/pdf" [data]="certificateUrl | async">
     </object>
   </div>
 </div>

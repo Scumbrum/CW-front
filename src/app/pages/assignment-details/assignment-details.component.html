@@ -1,0 +1,67 @@
+<ng-container *ngIf="assignment">
+  <h1>
+    <span>{{ assignment.data.name }}</span>
+  </h1>
+  <div class="time-indicator" *ngIf="isStarted && !isMyAssignment">
+    {{ timeLeft }}
+  </div>
+  <p
+    *ngIf="!isStarted && isAttempted"
+    class="user-score score-error"
+    [class.passed]="isPassed"
+  >Latest score: <b>{{ userScore }}</b></p>
+  <p *ngIf="!isAssignmentAvailable">
+    Nearest available date: {{ availableDate | date : 'dd.MMM.YYYY HH:mm' }}
+  </p>
+  <ng-container *ngIf="!isStarted">
+    <p>Score to pass: {{ assignment.data.minimumScore }}</p>
+    <p>Time to complete: {{ assignment.data.time }}m</p>
+  </ng-container>
+  <div class="controls" *ngIf="!isStarted">
+    <button
+      [disabled]="!isAssignmentAvailable || !isStreamAvailable"
+      *ngIf="!isStartHidden()"
+      mat-raised-button color="primary"
+      (click)="startPassing()"
+    >Start assignment</button>
+  </div>
+  <ng-container *ngIf="isStarted || isAttempted">
+    <h2>Tasks list</h2>
+    <ul class="tasks">
+      <li *ngFor="let question of assignment.questions; let i = index">
+        <h3 class="task-title">
+          <span>{{ i + 1 }}. {{ question.question }}</span>
+          <span class="score">Score:
+            <span *ngIf="!isStarted && isAttempted">{{ question.userScore }} / </span>
+            {{ question.taskScore }}
+          </span>
+        </h3>
+        <ul *ngIf="question.taskType === 1 && question.multiple" class="answers">
+          <li *ngFor="let answer of question.answerCases" [class.correct]="answer.isAnswerCorrect">
+            <mat-checkbox
+              [checked]="!!question.chosenAnswers?.includes(answer.answerCaseId)"
+              (change)="addAnswer(question.taskId, answer.answerCaseId, true)"
+            >{{ answer.answerCaseText }}</mat-checkbox>
+          </li>
+        </ul>
+        <mat-radio-group *ngIf="question.taskType === 1 && !question.multiple">
+          <mat-radio-button
+            *ngFor="let answer of question.answerCases" [value]="answer.answerCaseId"
+            [class.correct]="answer.isAnswerCorrect"
+            [checked]="!!question.chosenAnswers?.includes(answer.answerCaseId)"
+            (change)="addAnswer(question.taskId, answer.answerCaseId, false)"
+          >{{ answer.answerCaseText }}</mat-radio-button>
+        </mat-radio-group>
+        <mat-form-field *ngIf="question.taskType === 2" class="answer-comment">
+          <textarea
+            [formControl]="comments[question.taskId]"
+            [placeholder]="question.correctComment"
+            matInput></textarea>
+        </mat-form-field>
+      </li>
+    </ul>
+    <div class="controls" *ngIf="isStarted">
+      <button mat-raised-button color="primary" (click)="sendAssignment(false)">Send</button>
+    </div>
+  </ng-container>
+</ng-container>

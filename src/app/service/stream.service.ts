@@ -7,7 +7,7 @@ import {
   StreamListResponse,
   StreamResponse
 } from "../shared/interfaces/responses";
-import {Observable} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {StreamData} from "../shared/interfaces/params";
 
 @Injectable({
@@ -15,6 +15,7 @@ import {StreamData} from "../shared/interfaces/params";
 })
 export class StreamService {
   private baseurl = 'streams'
+  public addedStream$ = new BehaviorSubject<StreamData[]>([])
 
   constructor(
     private readonly api: ApiService
@@ -64,6 +65,15 @@ export class StreamService {
     return this.api.get<ArrayBuffer>(`${this.baseurl}/${id}/frame`, params, 'arraybuffer')
   }
 
+  public downLoadFile(data: ArrayBuffer, type: string) {
+    let blob = new Blob([data], { type: type});
+    let url = window.URL.createObjectURL(blob);
+    let pwa = window.open(url);
+    if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
+      alert( 'Please disable your Pop-up blocker and try again.');
+    }
+  }
+
   public createStream(streamData: StreamData): Observable<Stream> {
     return this.api.post<StreamData, Stream>(this.baseurl, streamData);
   }
@@ -92,8 +102,10 @@ export class StreamService {
     const parts =  {
       year: new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date),
       month: new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date),
-      day: new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date)
+      day: new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date),
+      hours: new Intl.DateTimeFormat('en', { hour: '2-digit', hourCycle: 'h23' }).format(date),
+      minutes: new Intl.DateTimeFormat('en', { minute: '2-digit' }).format(date),
     }
-    return `${parts.year}.${parts.month}.${parts.day}`
+    return `${parts.year}.${parts.month}.${parts.day} ${parts.hours}:${parts.minutes}`
   }
 }

@@ -26,7 +26,12 @@ import {ChatModule} from "@progress/kendo-angular-conversational-ui";
 import { StreamChatComponent } from './components/stream-chat/stream-chat.component';
 import { UsersListComponent } from './components/users-list/users-list.component';
 import { CourseDetailsComponent } from './pages/course-details/course-details.component';
-
+import { CourseModalComponent } from './components/course-modal/course-modal.component';
+import { AssignmentDetailsComponent } from './pages/assignment-details/assignment-details.component';
+import {CdkMenu} from "@angular/cdk/menu";
+import { CertificatesComponent } from './pages/certificates/certificates.component';
+import { MyPlansComponent } from './pages/my-plans/my-plans.component';
+import { UserAssignmentsComponent } from './pages/user-assignments/user-assignments.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -44,19 +49,25 @@ import { CourseDetailsComponent } from './pages/course-details/course-details.co
     StreamDetailsComponent,
     StreamChatComponent,
     UsersListComponent,
-    CourseDetailsComponent
+    CourseDetailsComponent,
+    CourseModalComponent,
+    AssignmentDetailsComponent,
+    CertificatesComponent,
+    MyPlansComponent,
+    UserAssignmentsComponent
   ],
-    imports: [
-        BrowserModule,
-        HttpClientModule,
-        BrowserAnimationsModule,
-        SharedModule,
-        ReactiveFormsModule,
-        AppRoutingModule,
-        FormsModule,
-        InfiniteScrollModule,
-        ChatModule
-    ],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    BrowserAnimationsModule,
+    SharedModule,
+    ReactiveFormsModule,
+    AppRoutingModule,
+    FormsModule,
+    InfiniteScrollModule,
+    ChatModule,
+    CdkMenu,
+  ],
 
   providers: [
     {

@@ -14,3 +14,15 @@ mat-list {
   max-height: 40vh;
   overflow: auto;
 }
+
+::ng-deep .nav-menu {
+  background: white;
+  border-radius: 5px;
+  padding: 10px 0 0;
+  min-width: 200px;
+}
+
+::ng-deep .nav-menu p {
+  padding: 5px 10px;
+  cursor: pointer;
+}

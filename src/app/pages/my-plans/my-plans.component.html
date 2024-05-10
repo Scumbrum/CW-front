@@ -1,0 +1,34 @@
+<mat-paginator
+  [pageSize]="pageSize"
+  [length]="total"
+  [hidePageSize]="true"
+  (page)="onPage($event)" aria-label="Select page">
+</mat-paginator>
+
+<ul class="plans">
+  <li *ngFor="let item of plans">
+      <mat-card class="plan-event">
+        <h3>{{ item.streamName }}</h3>
+        <p class="date">{{ item.startDate | date: 'YYYY.MM.dd' }}</p>
+        <p class="mark" [class.no-passed]="!item.isPassed">
+          {{ item.score }}
+          <sup class="async" *ngIf="item.isAsync">async</sup>
+        </p>
+        <div class="buttons">
+          <button
+            mat-raised-button
+            *ngIf="item.assignmentId"
+            [routerLink]="['/assignment', item.assignmentId]"
+          >
+            Assignment
+          </button>
+          <button
+            mat-raised-button
+            [routerLink]="['/stream', item.streamId]"
+          >
+            Stream
+          </button>
+        </div>
+      </mat-card>
+    </li>
+</ul>

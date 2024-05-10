@@ -1,0 +1,98 @@
+<ng-container [formGroup]="assignmentForm">
+  <div class="row">
+    <mat-form-field>
+      <input class="stream-name-controller"
+             type="text"
+             matInput
+             formControlName="name"
+             placeholder="Assignment title"
+      >
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option *ngFor="let type of typeList" [value]="type.id">{{type.label}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="row">
+    <mat-form-field >
+      <input class="stream-name-controller"
+             type="number"
+             matInput
+             formControlName="time"
+             placeholder="Assignment time (minutes)"
+      >
+    </mat-form-field>
+    <mat-form-field>
+      <input class="stream-name-controller"
+             type="number"
+             matInput
+             formControlName="minimumScore"
+             placeholder="Score to pass"
+      >
+    </mat-form-field>
+  </div>
+  <h3>Tasks list</h3>
+  <ul class="tasks" *ngFor="let task of tasks.controls;let i = index">
+    <li [formGroup]="taskForm(task)">
+      <p class="task-title">{{ i + 1 }}. <button mat-raised-button color="warn" (click)="deleteTask(i)">Delete</button></p>
+      <div class="row">
+      <mat-form-field>
+        <textarea class="stream-name-controller"
+               matInput
+               formControlName="question"
+               placeholder="Question"
+        ></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option *ngFor="let type of taskTypeList" [value]="type.id">{{ type.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field>
+          <input class="stream-name-controller"
+                 type="number"
+                 matInput
+                 formControlName="score"
+                 placeholder="Score"
+          >
+        </mat-form-field>
+        <mat-form-field *ngIf="taskForm(task).value.type === 2">
+          <input class="stream-name-controller"
+                 type="text"
+                 matInput
+                 formControlName="correctComment"
+                 placeholder="Correct answer"
+          >
+        </mat-form-field>
+      </div>
+      <ng-container *ngIf="taskForm(task).value.type === 1">
+        <p class="answers-title" >Answers:</p>
+        <ul class="answers" *ngFor="let answer of answers(task).controls; let j = index">
+          <li [formGroup]="taskForm(answer)">
+            <mat-form-field>
+            <textarea class="stream-name-controller"
+                      matInput
+                      formControlName="option"
+                      placeholder="Option"
+            ></textarea>
+            </mat-form-field>
+            <mat-checkbox formControlName="isCorrect">Correct</mat-checkbox>
+            <button mat-raised-button color="warn" (click)="deleteAnswer(task, j)">Delete</button>
+          </li>
+        </ul>
+      </ng-container>
+      <button class="answer-button" mat-raised-button (click)="addAnswer(task)">Add answer case</button>
+    </li>
+  </ul>
+  <button mat-raised-button class="task-button" (click)="addTask()">Add task</button>
+  <p *ngIf="!isMinimumScoreValid" class="score-error">Adjust minimum score of assignment</p>
+  <div class="controls">
+    <button mat-raised-button (click)="cancel()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="!isAssignmentValid">Save</button>
+  </div>
+</ng-container>

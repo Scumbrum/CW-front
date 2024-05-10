@@ -5,3 +5,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 * {
   box-sizing: border-box;
 }
+
+.timepicker-backdrop-overlay {
+  z-index: 1001!important;
+}
+
+.timepicker-overlay {
+  z-index: 1001!important;
+}

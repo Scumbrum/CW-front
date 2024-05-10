@@ -1,9 +1,11 @@
 <ng-container *ngIf="user">
   <form [formGroup]="form">
     <div class="action-panel" *ngIf="mode === 'me'" [class.centred]="role === 'admin'">
-      <button mat-raised-button (click)="logout()" class="logout" color="accent">Logout</button>
       <h2 *ngIf="role==='user'" >Profile of {{user.name}}</h2>
       <button mat-raised-button (click)="openStreamModal()" *ngIf="role==='user'" class="starter" color="primary">Start stream</button>
+      <button mat-raised-button (click)="openAssignmentModal()" class="starter" color="primary">Create assignment</button>
+      <button mat-raised-button [routerLink]="'/course/create'" *ngIf="role==='user'" class="starter" color="primary">Create course</button>
+      <button mat-raised-button (click)="logout()" class="logout" color="accent">Logout</button>
     </div>
     <div class="profile-container">
       <mat-list>
@@ -77,17 +79,36 @@
   <div class="streams">
     <ng-container *ngIf="mode === 'me'">
       <div class="list">
-        <h2>Ended streams</h2>
-        <mat-paginator [pageSize]="pageSize" [length]="total" [hidePageSize]="true" (page)="onPage($event)" aria-label="Select page">
+          <mat-select [formControl]="selectedStreams" class="select mat-elevation-z3">
+            <mat-option
+              [value]="'ended'">Ended
+            </mat-option>
+            <mat-option
+              [value]="'active'">Active
+            </mat-option>
+            <mat-option
+              [value]="'planed'">Planed
+            </mat-option>
+          </mat-select>
+        <h2>Streams</h2>
+        <mat-paginator
+          *ngIf="total"
+          [pageSize]="pageSize"
+          [length]="total"
+          [hidePageSize]="true"
+          (page)="onPage($event)" aria-label="Select page">
         </mat-paginator>
         <mat-list>
-          <mat-list-item (click)="downloadHandler(stream.id)" class="mat-mdc-list-item-interactive" *ngFor="let stream of endedStreams">
+          <mat-list-item
+            (click)="clickHandler(stream.id)"
+            class="mat-mdc-list-item-interactive"
+            *ngFor="let stream of endedStreams">
             {{ stream.name }}
           </mat-list-item>
         </mat-list>
       </div>
     </ng-container>
-    <div class="list" *ngIf="activeStreams.length">
+    <div class="list" *ngIf="mode !== 'me' && activeStreams.length">
       <h2>Active streams</h2>
       <mat-list>
         <mat-list-item class="mat-mdc-list-item-interactive" *ngFor="let stream of activeStreams" [routerLink]="['/stream', stream.id]">
@@ -96,6 +117,48 @@
       </mat-list>
     </div>
 
+    <ng-container *ngIf="mode === 'me'">
+      <div class="list">
+        <h2>My courses</h2>
+        <mat-paginator
+          [pageSize]="pageSize"
+          [length]="totalCourses"
+          [hidePageSize]="true"
+          (page)="onCoursePage($event)" aria-label="Select page">
+        </mat-paginator>
+        <mat-list>
+          <mat-list-item
+            class="mat-mdc-list-item-interactive"
+            *ngFor="let course of myCourses"
+            [routerLink]="['/course', course.id]">
+            {{ course.name }}
+          </mat-list-item>
+        </mat-list>
+      </div>
+      <div class="list assignments">
+        <h2>My assignments</h2>
+        <mat-paginator
+          [pageSize]="pageSize"
+          [length]="totalAssignments"
+          [hidePageSize]="true"
+          (page)="onAssignmentPage($event)"
+          aria-label="Select page"
+        >
+        </mat-paginator>
+        <mat-list>
+          <mat-list-item
+            class="mat-mdc-list-item-interactive"
+            *ngFor="let assignment of myAssignments"
+            [routerLink]="['/assignment', assignment.id]">
+            <span>{{ assignment.name }}</span>
+            <div class="controls">
+              <button mat-raised-button color="primary" (click)="editAssignment(assignment.id, $event)">Edit</button>
+              <button mat-raised-button color="warn" (click)="deleteAssignment(assignment.id, $event)">Delete</button>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+    </ng-container>
   </div>
 </ng-container>
 

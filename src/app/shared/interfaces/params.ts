@@ -9,6 +9,36 @@ export interface RegisterData {
   name: string,
 }
 
+export interface Answer {
+  option: string;
+  id?: number;
+  isCorrect: number;
+}
+
+export interface Task {
+  question: string;
+  type: number;
+  score: number;
+  correctComment?: string;
+  answers: Answer[];
+  id?: number;
+}
+
+export interface AddTaskRequest extends Task{
+  assignmentId: number;
+}
+
+export interface AssignmentAddRequest {
+  name: string;
+  type: number;
+  time: number;
+  minimumScore: number;
+  taskArray: Task[]
+}
+
+export interface AssignmentEditRequest extends Omit<AssignmentAddRequest, 'taskArray'>{
+}
+
 export interface UserData {
   name: string,
   about: string
@@ -16,6 +46,19 @@ export interface UserData {
 
 export interface SubscriptionData {
   target: number;
+}
+
+export interface UserAnswer {
+  taskId: number;
+  answerCaseIds?: number[];
+  comment?: string;
+}
+
+export interface UserRecordData {
+  planItem: number;
+  time: number;
+  userId?: number;
+  answers: UserAnswer[];
 }
 
 export interface RestrictionData {

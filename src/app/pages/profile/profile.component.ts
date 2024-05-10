@@ -1,7 +1,14 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {UsersService} from "../../service/users.service";
-import {Stream, UserResponse} from "../../shared/interfaces/responses";
-import {Subject, switchMap, takeUntil, tap} from "rxjs";
+import {
+  Assignment,
+  AssignmentDetails,
+  Course,
+  Stream,
+  StreamListResponse,
+  UserResponse
+} from "../../shared/interfaces/responses";
+import {EMPTY, Subject, switchMap, takeUntil, tap} from "rxjs";
 import {FormControl, FormGroup} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../service/auth.service";
@@ -10,6 +17,9 @@ import {MatDialog} from "@angular/material/dialog";
 import {StreamModalComponent} from "../../components/stream-modal/stream-modal.component";
 import {PageEvent} from "@angular/material/paginator";
 import {StreamService} from "../../service/stream.service";
+import {CourseService} from "../../service/course.service";
+import {CourseModalComponent} from "../../components/course-modal/course-modal.component";
+import {ToastrService} from "../../service/toastr.service";
 
 @Component({
   selector: 'app-profile',
@@ -17,7 +27,6 @@ import {StreamService} from "../../service/stream.service";
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit, OnDestroy {
-
   public user!: UserResponse;
   public mode!: 'me' | 'other';
   private destroy$ = new Subject<void>();
@@ -28,12 +37,21 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public activeStreams: Stream[] = [];
   public total!: number;
   public pageSize = 10;
+  public selectedStreams = new FormControl('active');
+  public myCourses: Course[] = [];
+  public myAssignments: Assignment[] = [];
+  public totalCourses = 0;
+  public totalAssignments = 0;
+  private currentAssignmentPage = 1;
+
   constructor(
     private readonly usersService: UsersService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly authService: AuthService,
     private readonly streamService: StreamService,
+    private readonly courseService: CourseService,
     private readonly router: Router,
+    private readonly toastrService: ToastrService,
     private readonly dialog: MatDialog
   ) {
     this.form = new FormGroup({
@@ -54,7 +72,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
           return this.usersService.getMe()
         }),
         tap(user => {
-          this.getEndedStreams(user.id);
           this.getActiveStreams(user.id);
         })
       )
@@ -63,13 +80,91 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.authService.authedRole
       .pipe(takeUntil(this.destroy$))
       .subscribe(role => this.role = role!);
+
+    this.listenStreams();
+    this.listenCourses();
+    this.listenAssignments();
   }
 
-  private getEndedStreams(userId: number): void {
-    this.usersService.getEndedStreams(userId, this.pageSize, 1)
+  private listenStreams(): void {
+    this.selectedStreams.valueChanges
+      .pipe(
+        switchMap(value => {
+          this.total = 0;
+          if (value === 'active') {
+            return this.usersService.getActiveStreams(this.user.id);
+          }
+          if (value === 'ended') {
+            return this.usersService.getEndedStreams(this.user.id, this.pageSize, 1)
+          }
+
+          if (value === 'planed') {
+            return this.usersService.getPlanedStreams('', this.user.id)
+          }
+          return EMPTY
+        })
+      )
+      .subscribe(value => {
+        const length = (value as Stream[]).length;
+        if (length) {
+          this.endedStreams = value as Stream[]
+        } else {
+          const response = value as StreamListResponse;
+          this.endedStreams = response.data;
+          this.total = response.totalPages;
+        }
+      })
+  }
+
+  private listenCourses(): void {
+    this.courseService.getMyCourses(this.pageSize, 1)
+      .subscribe(response => {
+        this.myCourses = response.data;
+        this.totalCourses = response.totalPages
+      })
+  }
+
+  private listenAssignments(): void {
+    this.courseService.getMyAssignmentsList(this.pageSize, 1)
+      .subscribe(response => {
+        this.myAssignments = response.data;
+        this.totalAssignments = response.totalPages
+      })
+  }
+
+  public onCoursePage(event: PageEvent): void {
+    this.courseService.getMyCourses(this.pageSize, event.pageIndex + 1)
       .pipe(takeUntil(this.destroy$))
       .subscribe(response => {
-        this.endedStreams = response.data;
+        this.myCourses = response.data;
+        this.total = response.totalPages;
+      })
+  }
+
+  public editAssignment(id: number, event: Event): void {
+    event.stopPropagation();
+    this.courseService.openAssignmentEditModal(id)
+      .subscribe(() => this.toastrService.setSuccess('Assignment successfully updated'))
+  }
+
+  public deleteAssignment(id: number, event: Event): void {
+    event.stopPropagation();
+    this.courseService.deleteAssignment(id)
+      .pipe(
+        switchMap(() => this.courseService.getMyAssignmentsList(this.pageSize, this.currentAssignmentPage))
+      )
+      .subscribe((response) => {
+        this.myAssignments = response.data;
+        this.total = response.totalPages;
+      })
+  }
+
+  public onAssignmentPage(event: PageEvent): void {
+    this.currentAssignmentPage = event.pageIndex + 1;
+    this.courseService.getMyAssignmentsList(this.pageSize, event.pageIndex + 1)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(response => {
+        this.myAssignments = response.data;
         this.total = response.totalPages;
       })
   }
@@ -77,15 +172,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public downloadHandler(id: number):void {
     this.streamService.getRecordStream(id)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(data => this.downLoadFile(data, 'video\/mp4'))
+      .subscribe(data => this.streamService.downLoadFile(data, 'video\/mp4'))
   }
 
-  private downLoadFile(data: ArrayBuffer, type: string) {
-    let blob = new Blob([data], { type: type});
-    let url = window.URL.createObjectURL(blob);
-    let pwa = window.open(url);
-    if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
-      alert( 'Please disable your Pop-up blocker and try again.');
+  public clickHandler(id: number): void {
+    switch(this.selectedStreams.value) {
+      case 'ended':
+        return this.downloadHandler(id)
+      case 'active':
+        this.router.navigate(['/stream', id])
+        return
+      case 'planed':
+        this.streamService.startStream(id)
+          .subscribe(() => this.router.navigate(['/stream', id]))
     }
   }
 
@@ -116,6 +215,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
       width: '60%',
       height: '80vh',
     })
+  }
+
+  public openAssignmentModal(): void {
+    const modal = this.dialog.open(CourseModalComponent)
+
+    modal.afterClosed()
+      .pipe(
+        switchMap(value => this.courseService.addAssignment(value))
+      )
+      .subscribe(() => {
+        this.toastrService.setSuccess('Assignment was added')
+      })
   }
 
   public onSubscribe(): void {

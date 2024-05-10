@@ -1,0 +1,68 @@
+:host {
+  display: block;
+  padding: 15px;
+  width: 60vw;
+  max-width: 1200px;
+  min-width: 500px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.row mat-form-field {
+  width: 40%;
+}
+
+.row mat-form-field.small {
+  width: 25%;
+}
+
+.tasks {
+  list-style: none;
+  padding: 0;
+}
+
+.answers-title, .answers {
+  padding-left: 20px;
+  list-style: none;
+}
+
+.answers li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.answers mat-form-field {
+  width: 60%;
+}
+
+.task-title button {
+  margin-left: 25px;
+}
+
+.answer-button {
+  margin-left: 25px;
+}
+
+.task-button {
+  margin-top: 25px;
+}
+
+.controls {
+  width: fit-content;
+  display: flex;
+  gap: 25px;
+  margin: 40px auto 0;
+}
+
+.score-error {
+  color: darkred;
+  margin: 20px 0;
+  font-size: 16px;
+}

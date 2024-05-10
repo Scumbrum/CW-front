@@ -10,6 +10,7 @@ import {Router} from "@angular/router";
 import {ROUTES} from "../../constants/routes";
 import {SelectOption} from "../../shared/interfaces/params";
 import {ToastrService} from "../../service/toastr.service";
+import {DateTime} from "luxon";
 
 @Component({
   selector: 'app-stream-modal',
@@ -27,7 +28,9 @@ export class StreamModalComponent implements OnInit, OnDestroy{
   public streamName = new FormControl('', [Validators.required]);
   public streamType = new FormControl(1, [Validators.required]);
   public dateStart = new FormControl(new Date(), [Validators.required]);
+  public timeStart = new FormControl<string>(DateTime.now().toFormat('h:mm a'), [Validators.required]);
   private destroy$ = new Subject<void>();
+  public startDate!: Date;
 
   public typeList: SelectOption[] = [
     {
@@ -44,7 +47,8 @@ export class StreamModalComponent implements OnInit, OnDestroy{
     private readonly streamService: StreamService,
     private readonly dialogRef: MatDialogRef<StreamModalComponent>,
     private readonly router: Router,
-    private readonly toastrService: ToastrService
+    private readonly toastrService: ToastrService,
+    @Inject(MAT_DIALOG_DATA) public data: {onlyPlan: boolean}
   ) {}
 
   public close(): void {
@@ -63,7 +67,21 @@ export class StreamModalComponent implements OnInit, OnDestroy{
         this.currentUsers = users.data;
         this.totalPages = users.totalPages;
         this.currentPage = 1;
-      })
+      });
+
+    const today = new Date();
+
+    if (this.data?.onlyPlan) {
+      today.setDate(today.getDate() + 1);
+    }
+
+    this.startDate = today;
+
+    this.timeStart.setValue(DateTime.fromJSDate(this.startDate).toFormat('h:mm a'))
+  }
+
+  public get minTime(): DateTime {
+    return DateTime.fromJSDate(this.dateStart.value!);
   }
 
   public addToModerators(moderator: UserResponse): void {
@@ -82,7 +100,14 @@ export class StreamModalComponent implements OnInit, OnDestroy{
   public onSubmit():void {
     this.streamName.markAsTouched();
     if(!this.dataValid) return
-    const date = this.streamService.dateToString(this.dateStart.value!);
+    const rawDate = this.dateStart.value!;
+
+    const rawTime = DateTime.fromFormat(this.timeStart.value!, 'h:mm a');
+    rawDate.setHours(rawTime.get('hour'));
+    rawDate.setMinutes(rawTime.get('minute'))
+    console.log(rawDate)
+
+    const date = this.streamService.dateToString(rawDate);
     const moderators =  this.selectedModerators.map(moderator => moderator.id);
     this.streamService.createStream({
       name: this.streamName.value!,
@@ -99,7 +124,7 @@ export class StreamModalComponent implements OnInit, OnDestroy{
         } else {
           this.router.navigate(['stream', response.id]);
         }
-        this.dialogRef.close();
+        this.dialogRef.close(response);
       })
   }
 

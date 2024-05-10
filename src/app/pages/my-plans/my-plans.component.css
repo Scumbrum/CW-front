@@ -1,0 +1,46 @@
+:host {
+  max-width: 1600px;
+  padding: 0 16px 30px;
+  margin: 0 auto;
+  display: block;
+}
+
+.plans {
+  list-style: none;
+  padding: 0;
+}
+
+.plans li mat-card {
+  background: lightgray;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.plans .mark {
+  font-size: 24px;
+  font-weight: 600;
+  color: darkgreen;
+}
+
+.plans .mark.no-passed {
+  color: darkred;
+}
+
+.plans li {
+  margin-bottom: 15px;
+}
+
+.plans p, .plans h3 {
+  margin: 0;
+}
+
+.plans h3 {
+  text-decoration: underline;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+}

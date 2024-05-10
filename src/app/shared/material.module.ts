@@ -17,6 +17,9 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatNativeDateModule} from "@angular/material/core";
+import {NgxMaterialTimepickerModule} from "ngx-material-timepicker";
+import {MatCheckbox, MatCheckboxModule} from "@angular/material/checkbox";
+import {CdkMenuTrigger} from "@angular/cdk/menu";
 
 
 @NgModule({
@@ -40,7 +43,10 @@ import {MatNativeDateModule} from "@angular/material/core";
     MatDialogModule,
     MatMenuModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    NgxMaterialTimepickerModule,
+    MatCheckboxModule,
+    CdkMenuTrigger
   ],
   exports: [
     MatCardModule,
@@ -61,7 +67,10 @@ import {MatNativeDateModule} from "@angular/material/core";
     MatDialogModule,
     MatMenuModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    NgxMaterialTimepickerModule,
+    MatCheckboxModule,
+    CdkMenuTrigger
   ]
 })
 export class MaterialModule { }

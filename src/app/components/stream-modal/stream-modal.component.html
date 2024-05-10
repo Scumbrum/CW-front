@@ -11,11 +11,16 @@
       </mat-select>
     </mat-form-field>
     <mat-form-field>
-      <mat-label>End date</mat-label>
-      <input [formControl]="dateStart" matInput [matDatepicker]="picker">
+      <mat-label>Date</mat-label>
+      <input [min]="startDate" [formControl]="dateStart" matInput [matDatepicker]="picker">
       <mat-hint>MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Time</mat-label>
+      <input [formControl]="timeStart" [ngxTimepicker]="timePicker" matInput>
+      <ngx-material-timepicker [min]="minTime" #timePicker></ngx-material-timepicker>
     </mat-form-field>
   </div>
 

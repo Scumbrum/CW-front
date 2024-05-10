@@ -91,6 +91,14 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
       })
   }
 
+  public openInNewWindow(url: any[]): void {
+    const urlSerialized = this.router.serializeUrl(
+      this.router.createUrlTree(url)
+    );
+
+    window.open(urlSerialized, '_blank');
+  }
+
   public async progress(event: Event): Promise<void> {
     const target = event.target as HTMLVideoElement;
 
@@ -186,6 +194,7 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       ).subscribe({
           next: user => {
+            console.log(user)
             this.isSubscribes = user.isSubscribed!;
           },
           error: () => {

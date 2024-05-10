@@ -1,0 +1,7 @@
+:host {
+  width: 100%;
+  display: block;
+  padding: 15px;
+  max-width: 400px;
+  margin: 0 auto;
+}

@@ -1,0 +1,17 @@
+<mat-paginator
+  [pageSize]="pageSize"
+  [length]="total"
+  [hidePageSize]="true"
+  (page)="onPage($event)" aria-label="Select page">
+</mat-paginator>
+
+<mat-list>
+  <mat-list-item
+    [routerLink]="['/assignment', assignment.assignmentId]"
+    [queryParams]="{ 'userId': assignment.userId }"
+    *ngFor="let assignment of assignments"
+  >
+    {{ assignment.userName }}
+  </mat-list-item>
+</mat-list>
+
