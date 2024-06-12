@@ -5,9 +5,7 @@ import {UsersService} from "../../service/users.service";
 import {FormControl, Validators} from "@angular/forms";
 import {debounceTime, Subject, switchMap, takeUntil} from "rxjs";
 import {StreamService} from "../../service/stream.service";
-import {D} from "@angular/cdk/keycodes";
 import {Router} from "@angular/router";
-import {ROUTES} from "../../constants/routes";
 import {SelectOption} from "../../shared/interfaces/params";
 import {ToastrService} from "../../service/toastr.service";
 import {DateTime} from "luxon";
@@ -104,8 +102,13 @@ export class StreamModalComponent implements OnInit, OnDestroy{
 
     const rawTime = DateTime.fromFormat(this.timeStart.value!, 'h:mm a');
     rawDate.setHours(rawTime.get('hour'));
-    rawDate.setMinutes(rawTime.get('minute'))
-    console.log(rawDate)
+    rawDate.setMinutes(rawTime.get('minute'));
+
+    if (this.data.onlyPlan && rawDate.valueOf() <= new Date().valueOf()) {
+      this.toastrService.setError('Chose future date');
+      return;
+    }
+
 
     const date = this.streamService.dateToString(rawDate);
     const moderators =  this.selectedModerators.map(moderator => moderator.id);

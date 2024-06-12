@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {StreamService} from "../../service/stream.service";
-import {EMPTY, Subject, switchMap, takeUntil} from "rxjs";
+import {EMPTY, Subject, switchMap, take, takeUntil} from "rxjs";
 import {Stream} from "../../shared/interfaces/responses";
 import {AuthService} from "../../service/auth.service";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
@@ -9,6 +9,7 @@ import {ToastrService} from "../../service/toastr.service";
 import {UsersService} from "../../service/users.service";
 import {ChatService} from "../../service/chat.service";
 import {ROUTES} from "../../constants/routes";
+import {CourseService} from "../../service/course.service";
 
 @Component({
   selector: 'app-stream-details',
@@ -48,6 +49,7 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
     private readonly toastrService: ToastrService,
     private readonly sanitizer: DomSanitizer,
     private readonly chatService: ChatService,
+    private readonly courseService: CourseService,
     private readonly router: Router,
   ) {}
 
@@ -75,6 +77,7 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(connected => {
         this.streamData = {...this.streamData, viewers: connected }
+        this.streamData
       })
 
     this.srcStream
@@ -183,6 +186,7 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
             this.streamData = { ...stream.data, viewers: 0 };
             this.isModerator = stream.isModerator;
             this.authorMode = stream.data.userId === this.authService.authedId.getValue();
+            this.tryMarkEvent()
           }
           if (this.authorMode) {
             this.startRecording();
@@ -194,7 +198,6 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       ).subscribe({
           next: user => {
-            console.log(user)
             this.isSubscribes = user.isSubscribed!;
           },
           error: () => {
@@ -202,6 +205,14 @@ export class StreamDetailsComponent implements OnInit, OnDestroy {
             this.loadStream()
           }
       })
+  }
+
+  public tryMarkEvent(): void {
+    if (!this.authorMode && this.streamData.planItemId && !this.streamData.assignmentId) {
+      this.courseService.markPlanAsDone(this.streamData.planItemId)
+        .pipe(take(1))
+        .subscribe()
+    }
   }
 
   public onLoad(event: Event): void {

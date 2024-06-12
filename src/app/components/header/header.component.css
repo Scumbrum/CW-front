@@ -7,11 +7,11 @@
 }
 
 mat-list {
-  max-height: 40vh;
+  max-height: 37vh;
 }
 
 .notification-inner {
-  max-height: 40vh;
+  max-height: 37vh;
   overflow: auto;
 }
 

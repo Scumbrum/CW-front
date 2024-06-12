@@ -44,6 +44,7 @@ export class CourseDetailsComponent implements OnInit {
   public searchStream = new FormControl('')
   private searcherDestroy = new Subject<void>();
   private redirectAfterFill = false;
+  public certificateUrl?: SafeResourceUrl;
 
   constructor(
     private readonly courseService: CourseService,
@@ -72,24 +73,34 @@ export class CourseDetailsComponent implements OnInit {
           this.toggleEditMode()
           this.redirectAfterFill = true;
           return EMPTY;
+        }),
+        switchMap(response => {
+          this.details = response;
+          this.isMyCourse = this.details.data.userId === this.authService.authedId.getValue()
+            || this.authService.authedRole.getValue() === 'admin'
+
+          if (!this.details?.data.isPassed) {
+            return EMPTY
+          }
+          return this.certificateUrl$
         })
       ).subscribe(response => {
-        this.details = response;
-        this.isMyCourse = this.details.data.userId === this.authService.authedId.getValue()
-          || this.authService.authedRole.getValue() === 'admin'
+        this.certificateUrl = response;
     })
   }
 
   private listenPlanedStreams(): void {
-    this.userService.getPlanedStreams('', this.authService.authedId.getValue())
+    this.userService.getPlanedStreams('', this.authService.authedId.getValue(), this.details?.data.id)
       .subscribe(value => {
         this.planedStreams = value;
-        this.filteredStreams = value;
+        this.filteredStreams = value
+          .filter(stream => !this.planForm.controls.some(control => control.value.streamId === stream.id));
       })
 
     this.searchStream.valueChanges
       .pipe(takeUntil(this.searcherDestroy))
       .subscribe(value => this.filteredStreams = this.planedStreams
+        .filter(stream => !this.planForm.controls.some(control => control.value.streamId === stream.id))
         .filter(item => item.name.toLowerCase().includes(value!.toLowerCase())))
   }
 
@@ -102,28 +113,41 @@ export class CourseDetailsComponent implements OnInit {
 
     modal.afterClosed()
       .subscribe((stream) => {
-        console.log(stream)
         if (!stream) return;
         this.planedStreams = [
           ...this.planedStreams,
           stream
         ];
 
-        this.filteredStreams = this.planedStreams;
+        this.filteredStreams = this.planedStreams
+          .filter(stream => !this.planForm.controls.some(control => control.value.streamId === stream.id));
       })
   }
 
   private listenAssignments(): void {
-    this.courseService.getMyAssignmentsList(1000, 1)
+    this.courseService.getMyAssignmentsList(1000, 1, this.details!.data.id)
       .subscribe(value => {
         this.assignments = value.data;
-        this.filteredAssignments = value.data;
+        this.filteredAssignments = value.data
+          .filter(assignment => !this.planForm.controls.some(control => control.value.assignmentId === assignment.id));
       })
 
     this.searchAssigment.valueChanges
       .pipe(takeUntil(this.searcherDestroy))
-      .subscribe(value => this.filteredAssignments = this.assignments
-        .filter(item => item.name.toLowerCase().includes(value!.toLowerCase())))
+      .subscribe(value => {
+        this.filteredAssignments = this.assignments
+          .filter(assignment => !this.planForm.controls.some(control => control.value.assignmentId === assignment.id))
+          .filter(item => item.name.toLowerCase().includes(value!.toLowerCase()))
+      })
+
+    this.planForm.valueChanges
+      .subscribe(() => {
+      this.filteredAssignments = this.assignments
+        ?.filter(assignment => !this.planForm.controls.some(control => control.value.assignmentId === assignment.id));
+
+      this.filteredStreams = this.planedStreams
+        ?.filter(stream => !this.planForm.controls.some(control => control.value.streamId === stream.id))
+    })
   }
 
   public clearStreamSearch(): void {
@@ -299,10 +323,26 @@ export class CourseDetailsComponent implements OnInit {
   public startStream(plan: PlanItem): void {
     if (this.isMyCourse && !plan.isActive) {
       this.streamService.startStream(plan.streamId)
-        .subscribe(() => this.openInNewWindow(['/stream', plan.streamId]))
-    } else {
-      if (!plan.assignmentId && !plan.isPassed) {
-        this.courseService.markPlanAsDone(plan.planItemId).subscribe()
+        .subscribe(() => {
+          plan.isActive = true;
+          this.openInNewWindow(['/stream', plan.streamId])
+        })
+
+      return
+    }
+    if (!plan.assignmentId && !plan.isPassed) {
+      this.courseService.markPlanAsDone(plan.planItemId).subscribe((response) => {
+        this.details?.plan.map(other => {
+          if (other.planItemId === plan.planItemId) {
+            return {
+              ...plan,
+              ...response
+            }
+          }
+
+          return plan
+        })
+      })
       }
 
       if (new Date(plan.startDate).valueOf() < new Date().valueOf() && !plan.isActive) {
@@ -313,7 +353,6 @@ export class CourseDetailsComponent implements OnInit {
       if (plan.isActive) {
         this.openInNewWindow(['/stream', plan.streamId]);
       }
-    }
   }
 
   public assignmentHandler(id: number): void {
@@ -338,7 +377,8 @@ export class CourseDetailsComponent implements OnInit {
           value.data
         ];
 
-        this.filteredAssignments = this.assignments;
+        this.filteredAssignments = this.assignments
+          .filter(assignment => !this.planForm.controls.some(control => control.value.assignmentId === assignment.id));
         this.toastrService.setSuccess('Assignment was added')
       })
   }
@@ -364,7 +404,7 @@ export class CourseDetailsComponent implements OnInit {
     return this.details.plan.reduce((acc, item) => acc + (item.score || 0), 0);
   }
 
-  public get certificateUrl(): Observable<SafeResourceUrl> {
+  public get certificateUrl$(): Observable<SafeResourceUrl> {
     return this.courseService.getCertificateUrl(this.details!.data.id)
       .pipe(map(url => this.sanitizer.bypassSecurityTrustResourceUrl(url)))
   }
@@ -377,16 +417,29 @@ export class CourseDetailsComponent implements OnInit {
     window.open(urlSerialized, '_blank');
   }
 
-  public getStreamLabel(id: number): string {
-    return this.planedStreams.find(stream => stream.id === id)!.name;
+  public getStreamLabel(id: number, index: number): string {
+    return this.planedStreams?.find(stream => stream.id === id)?.name || this.details?.plan[index]?.streamName || '';
   }
 
-  public isSelectedStreamInList(id: number): boolean {
-    return this.planedStreams.some(stream => stream.id === id);
+  public getAssignmentLabel(id: number): string {
+    return this.assignments?.find(stream => stream.id === id)?.name || '';
   }
+
+  public isSelectedStreamInList(id: number, index: number): boolean {
+    return this.planedStreams?.some(stream => stream.id === id) || this.itemForm(index).value.streamId === id;
+  }
+
+  public isSelectedAssignmentInList(id: number | null, index: number): boolean {
+    return this.assignments?.some(assignment => assignment.id === id) || this.itemForm(index).value.streamId === id;
+  }
+
 
   public isRecordStarted(plan: PlanItem): boolean {
     return !!plan.assignmentId && new Date(plan.startDate).valueOf() <= new Date().valueOf()
+  }
+
+  public isDisabledStream(item: PlanItem): boolean {
+    return !this.isMyCourse && new Date(item.startDate).valueOf() > new Date().valueOf()
   }
 
   public deleteSubscription(): void {
@@ -398,5 +451,13 @@ export class CourseDetailsComponent implements OnInit {
     if (!this.details) return;
     this.courseService.addCourseSubscription(this.details.data.id)
       .subscribe(() => this.details!.data.isSubscribed = true)
+  }
+
+  public downloadCertificate(event: Event): void {
+    event.preventDefault()
+    this.courseService.getCertificateUrl(this.details!.data.id)
+      .subscribe(url => {
+        this.streamService.downLoadFile(url, 'pdf')
+      })
   }
 }

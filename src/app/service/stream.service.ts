@@ -65,9 +65,16 @@ export class StreamService {
     return this.api.get<ArrayBuffer>(`${this.baseurl}/${id}/frame`, params, 'arraybuffer')
   }
 
-  public downLoadFile(data: ArrayBuffer, type: string) {
-    let blob = new Blob([data], { type: type});
-    let url = window.URL.createObjectURL(blob);
+  public downLoadFile(data: ArrayBuffer | string, type: string) {
+    let url = '';
+
+    if (data instanceof ArrayBuffer) {
+      let blob = new Blob([data], { type: type});
+      url = window.URL.createObjectURL(blob);
+    } else {
+      url = data
+    }
+
     let pwa = window.open(url);
     if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
       alert( 'Please disable your Pop-up blocker and try again.');

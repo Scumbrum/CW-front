@@ -3,7 +3,7 @@
     <div class="action-panel" *ngIf="mode === 'me'" [class.centred]="role === 'admin'">
       <h2 *ngIf="role==='user'" >Profile of {{user.name}}</h2>
       <button mat-raised-button (click)="openStreamModal()" *ngIf="role==='user'" class="starter" color="primary">Start stream</button>
-      <button mat-raised-button (click)="openAssignmentModal()" class="starter" color="primary">Create assignment</button>
+      <button mat-raised-button (click)="openAssignmentModal()"  *ngIf="role==='user'" class="starter" color="primary">Create assignment</button>
       <button mat-raised-button [routerLink]="'/course/create'" *ngIf="role==='user'" class="starter" color="primary">Create course</button>
       <button mat-raised-button (click)="logout()" class="logout" color="accent">Logout</button>
     </div>

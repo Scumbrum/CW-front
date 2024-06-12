@@ -76,11 +76,12 @@ export class CourseService {
     return this.api.get<number[]>(`${this.baseUrl}/certificate`);
   }
 
-  public getMyAssignmentsList(size: number, pageNumber: number): Observable<AssignmentResponse> {
+  public getMyAssignmentsList(size: number, pageNumber: number, courseId?: number): Observable<AssignmentResponse> {
     const params = new HttpParams({
       fromObject: {
         size,
         pageNumber,
+        courseId: courseId || ''
       }
     })
     return this.api.get<AssignmentResponse>(`${this.baseUrl}/my-assignments`, params);

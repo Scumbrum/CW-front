@@ -39,10 +39,11 @@ export class UsersService {
     return this.api.get<StreamListResponse>(`${this.baseUrl}/${userId}/ended`, params)
   }
 
-  public getPlanedStreams(name: string, userId: number): Observable<Stream[]> {
+  public getPlanedStreams(name: string, userId: number, courseId?: number): Observable<Stream[]> {
     const params = new HttpParams({
       fromObject: {
-        name
+        name,
+        courseId: courseId || ''
       }
     })
     return this.api.get<Stream[]>(`${this.baseUrl}/${userId}/planed`, params)

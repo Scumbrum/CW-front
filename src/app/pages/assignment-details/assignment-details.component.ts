@@ -172,6 +172,6 @@ export class AssignmentDetailsComponent implements OnInit {
   }
 
   public get isStreamAvailable(): boolean {
-    return true || new Date().valueOf() >= new Date(this.assignment.data.dateStart!).valueOf()
+    return new Date().valueOf() >= new Date(this.assignment.data.dateStart!).valueOf()
   }
 }

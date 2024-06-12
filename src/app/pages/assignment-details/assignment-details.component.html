@@ -40,6 +40,7 @@
           <li *ngFor="let answer of question.answerCases" [class.correct]="answer.isAnswerCorrect">
             <mat-checkbox
               [checked]="!!question.chosenAnswers?.includes(answer.answerCaseId)"
+              [disabled]="!isStarted"
               (change)="addAnswer(question.taskId, answer.answerCaseId, true)"
             >{{ answer.answerCaseText }}</mat-checkbox>
           </li>
@@ -48,6 +49,7 @@
           <mat-radio-button
             *ngFor="let answer of question.answerCases" [value]="answer.answerCaseId"
             [class.correct]="answer.isAnswerCorrect"
+            [disabled]="!isStarted"
             [checked]="!!question.chosenAnswers?.includes(answer.answerCaseId)"
             (change)="addAnswer(question.taskId, answer.answerCaseId, false)"
           >{{ answer.answerCaseText }}</mat-radio-button>

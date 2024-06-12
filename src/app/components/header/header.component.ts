@@ -89,11 +89,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.notifications = this.notifications.map(other => {
           if(notification.id === other.id) {
             return {
-              ...notification,
+              ...other,
               isViewed: true
             }
           }
-          return notification
+          return other
         })
         this.unreaded -= 1;
       })

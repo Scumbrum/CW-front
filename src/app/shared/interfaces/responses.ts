@@ -57,8 +57,9 @@ export interface Stream {
   viewers: number;
   reports: number;
   dateStart: string;
-  assignmentId: string | null;
-  planItemId: string | null;
+  assignmentId: number | null;
+  planItemId: number | null;
+  courseId: number | null
   type: number;
   planed: boolean;
 }

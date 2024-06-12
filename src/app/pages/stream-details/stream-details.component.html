@@ -63,6 +63,13 @@
           >
             Assignment
           </button>
+          <button
+            mat-raised-button
+            *ngIf="streamData.courseId"
+            (click)="openInNewWindow(['/course', streamData.courseId])"
+          >
+            Course
+          </button>
           <button *ngIf="!authorMode && !isSubscribes" mat-raised-button (click)="subscribe()" color="accent">Subscribe</button>
           <button *ngIf="!authorMode && isSubscribes" mat-raised-button (click)="unsubscribe()" color="primary">Unsubscribe</button>
         </div>
